@@ -1,0 +1,4 @@
+build/
+*.so
+.kdev4
+*.kdev4

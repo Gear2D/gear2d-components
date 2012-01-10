@@ -1,0 +1,10 @@
+This repository contains some Gear2D
+components that are mostly useful to
+any game, such as rendering and spa-
+tial  components. These, when  used,
+complete the game engine.
+
+You'll need the gear2d framework to
+properly compile and use these.
+
+- Leo
