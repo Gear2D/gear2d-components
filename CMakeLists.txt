@@ -1,4 +1,4 @@
-project(Gear2D-Components)
+project(gear2d-components)
 cmake_minimum_required(VERSION 2.6)
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
@@ -9,6 +9,7 @@ find_path(GEAR2D_INCLUDE_DIR gear2d.h
 	PATHS
 	/usr/include/gear2d
 	/usr/local/include/gear2d
+	/opt/include/gear2d
 )
 if (WIN32)
 	find_path(
@@ -25,6 +26,7 @@ else ()
 	find_path(GEAR2D_LINK_DIR libgear2d.so
 		/usr/lib
 		/usr/local/lib
+		/opt/lib
 	)
 endif(WIN32)
 			
@@ -111,10 +113,3 @@ target_link_libraries(collider2d gear2d)
 target_link_libraries(rigidbody2d gear2d)
 target_link_libraries(singleselect gear2d)
 target_link_libraries(spritesheet gear2d)
-
-#target_link_libraries(moveto gear2d)
-
-# WARNING Remember to add those components here too
-
-#	keyboard render kinematic2d space2d)
-
