@@ -19,10 +19,11 @@
  * @li <tt>\<id\>.position.bind</tt>: Tells if the position of this image shall follow spatial info (x, y). @b bool. Defaults to 1 (true)
  * @li <tt>\<id\>.position.absolute</tt>: Tells if camera should be taken in account when rendering this. @b bool. 1 (true)
  * @li <tt>\<id\>.position.{x|y|z}</tt>: Specifics about the position of the image. If position.bind is specified, it will become an offset. @b float
- * @li <tt>\<id\>.position.{w|h}</tt>: Width and height of the image @b int
+ * @li <tt>\<id\>.position.{w|h}</tt>: Width and height of the image. Note that this does not scale the image, see "scale" below. @b int
  * @li <tt>\<id\>.clip.{x|y|w|h}</tt>: Clipping frame for the image. Defaults to whole image. @b float
  * @li <tt>\<id\>.alpha</tt>: Alpha value for the surface. 0 is transparent, 1 is opaque. @b float
  * @li <tt>\<id\>.render</tt>: Sets if this surface shall be rendered. 0 is false (don't render) and 1 is true (render). Defaults to true.
+ * @li <tt>\<id\>.zoom</tt>: Scale this image zoom by a factor. @b float. Natural scale is 1.0. Less than 1 will shrink, bigger than 1 will enlarge. Defaults to 1.0.
  * @li <tt>renderer.texts</tt>: list of ids to be treated like text
  * @li <tt>\<id\>.text</tt>: Text to be rendered. This only works if @c <id> was declared at renderer.texts
  * @li <tt>\<id\>.blended</tt>: Shall the text be rendered in blend mode (alpha blending)? Defaults to 0 @b bool. Do not use for text that changes much. 
@@ -50,8 +51,7 @@ using namespace std;
 #include "SDL_rotozoom.h"
 
 // this handles surface parameters
-class surface {
-	public:
+struct surface {
 		// id of this surface
 		string id;
 		component::base * parent;
@@ -60,7 +60,8 @@ class surface {
 		float x;
 		float y;
 		float z;
-		float rotation;
+		float rotation, oldrotation;
+		float zoom, oldzoom;
 		int w;
 		int h;
 		float oldz;
@@ -73,7 +74,12 @@ class surface {
 		// raw surface
 		SDL_Surface * raw;
 		
-	public:
+		// rotozoomed surface
+		SDL_Surface * rotozoomed;
+		
+		/* if dirty, rotozoom shall take place */
+		bool dirty;
+		
 		bool operator<(const surface & other) const {
 			// only zordering really matters.
 			return (z < other.z);
@@ -98,13 +104,18 @@ class surface {
 		, y(0.0f)
 		, z(0.0f)
 		, rotation(0.0f)
+		, oldrotation(rotation)
+		, zoom(1.0f)
+		, oldzoom(zoom)
 		, w(0)
 		, h(0)
 		, oldz(z)
 		, alpha(1.0f)
 		, bind(true)
 		, absolute(false)
-		, raw(raw) { 
+		, raw(raw)
+		, rotozoomed(NULL)
+		, dirty(false) { 
 		}
 		
 		virtual ~surface() { }
@@ -214,39 +225,57 @@ class renderer : public component::base {
 		virtual component::family family() { return "renderer"; }
 		virtual string depends() { return "spatial/space2d"; }
 		
+		/* hooks */
+		virtual void zhandler(parameterbase::id pid, component::base * lastwrite, object::id owner) {
+			int p = pid.find(".position.z");
+			string surfid = pid.substr(0, p);
+			surface * s = surfacebyid[surfid];
+			if (s == 0) return;
+			// right, the very same parameter we're interested
+			zordered.erase(zorder(s->oldz, s));
+			s->oldz = s->z;
+			zordered.insert(zorder(s->z, s));
+		}
+		
+		virtual void zoomhandler(parameterbase::id pid, component::base * lastwrite, object::id owner) {
+			int p = pid.find(".zoom");
+			string surfid = pid.substr(0, p);
+			surface * s = surfacebyid[surfid];
+			if (s == 0) return;
+			if (s->zoom != s->oldzoom) { s->dirty = true; s->oldzoom = s->zoom; }
+		}
+		
+		virtual void rotationhandler(parameterbase::id pid, component::base * lastwrite, object::id owner) {
+			int p = pid.find(".position.rotation");
+			string surfid = pid.substr(0, p);
+			surface * s = surfacebyid[surfid];
+			if (s == 0) return;
+			if (s->rotation != s->oldrotation) { s->dirty = true; s->oldrotation = s->rotation; }
+		}
+		
+		virtual void texthandler(parameterbase::id pid, component::base * lastwrite, object::id owner) {
+			int p = pid.find('.');
+			string textid = pid.substr(0, p);
+			
+			// changing some text we own
+			if (textdefbyid[textid] != 0) {
+				surface *& s = surfacebyid[textid];
+				textdef *& t = textdefbyid[textid];
+				if (t == 0 || s == 0) return;
+				SDL_FreeSurface(s->raw);
+				s->raw = textdefbyid[textid]->render();
+			}
+		}
+		
 		virtual void handle(parameterbase::id pid, component::base * lastwrite, object::id owner) {
 			int p;
 			if (pid == "renderer.surfaces") {
 				loadsurfaces(surfaces, read<string>("imgpath"));
 			}
 			
+			/* TODO: Add support for new texts... */
 			else if (pid == "renderer.texts") {
 				//frak...
-			}
-			
-			// handle when z changes, so we can update our zordered list
-			else if ((p = pid.find(".position.z")) != string::npos) {
-				string surfid = pid.substr(0, p);
-				surface * s = surfacebyid[surfid];
-				if (s == 0) return;
-				// right, the very same parameter we're interested
-				zordered.erase(zorder(s->oldz, s));
-				s->oldz = s->z;
-				zordered.insert(zorder(s->z, s));
-			}
-			
-			// it is a subbitch
-			else if ((p = pid.find('.')) != string::npos) {
-				string textid = pid.substr(0, p);
-								
-				// changing some text we own
-				if (textdefbyid[textid] != 0) {
-					surface *& s = surfacebyid[textid];
-					textdef *& t = textdefbyid[textid];
-					if (t == 0 || s == 0) return;
-					SDL_FreeSurface(s->raw);
-					s->raw = textdefbyid[textid]->render();
-				}
 			}
 		}
 		virtual void setup(object::signature & sig) {
@@ -277,51 +306,9 @@ class renderer : public component::base {
 				while (!texts.empty()) {
 					const string & id = *texts.begin();
 					textdef * t = new textdef(this, id);
-					pid = id + ".text";
-					bind(pid, t->text);
-					t->text = sig[pid];
-					hook(pid);
-					
-					pid = id + ".blended";
-					bind(pid, t->blended);
-					t->blended = eval(sig[pid], false);
-					hook(pid);
-					
-					pid = id + ".font";
-					bind(pid, t->font);
-					t->font = sig[pid];
-					hook(pid);
-					
-					pid = id + ".font.size";
-					bind(pid, t->fontsz);
-					t->fontsz = eval<int>(sig[pid], 10);
-					hook(pid);
-					
-					pid = id + ".font.r";
-					bind(pid, t->r);
-					t->r = eval(sig[pid], 0.0f);
-					hook(pid);
-					
-					pid = id + ".font.g";
-					bind(pid, t->g);
-					t->g = eval(sig[pid], 0.0f);
-					hook(pid);
-					
-					pid = id + ".font.b";
-					bind(pid, t->b);
-					t->b = eval(sig[pid], 0.0f);
-					hook(pid);
-					
-					pid = id + ".styles";
-					bind(pid, t->styles);
-					t->styles = sig[pid];
-					hook(pid);
-					
-					// this will create the surface,
-					// bind the values
-					// and hook to zordering
-					prepare(id, t->render());
+					loadtext(id, t, sig);
 					textdefbyid[id] = t;
+					prepare(id, t->render());
 					texts.erase(id);
 				}
 			}
@@ -335,6 +322,8 @@ class renderer : public component::base {
 			}
 			
 			// initialize with signature;
+			// we do not need to rerun this because if the user loads a surface
+			// after setup phase, probably he'll load parameters by himself.
 			for (map<string, surface*>::iterator i = surfacebyid.begin(); i != surfacebyid.end(); i++) {
 				string id = i->first;
 				surface * s = i->second;
@@ -346,6 +335,7 @@ class renderer : public component::base {
 				write(id + ".position.w", eval(sig[id + ".position.w"], s->raw->w));
 				write(id + ".position.h", eval(sig[id + ".position.h"], s->raw->h));
 				write(id + ".position.rotation", eval(sig[id + ".position.rotation"], 0.0f));
+				write(id + ".zoom", eval(sig[id + ".zoom"], 1.0f));
 				write(id + ".clip.x", eval<int>(sig[id + ".clip.x"], 0));
 				write(id + ".clip.y", eval<int>(sig[id + ".clip.y"], 0));
 				write(id + ".clip.w", eval<int>(sig[id + ".clip.w"], s->raw->w));
@@ -355,7 +345,6 @@ class renderer : public component::base {
 				write(id + ".alpha", eval<float>(sig[id + ".alpha"], 1.0f));
 				write(id + ".render", eval<bool>(sig[id + ".render"], true));
 			
-				hook(id + ".position.z");
 				zordered.insert(zorder(s->z, s));
 			}
 		}
@@ -369,7 +358,49 @@ class renderer : public component::base {
 		}
 	private:
 		
-
+		/* load fonts according to signature */
+		void loadtext(string id, textdef * t, object::signature & sig) {
+			string pid;
+			pid = id + ".text";
+			bind(pid, t->text);
+			t->text = sig[pid];
+			hook(pid, (component::call)&renderer::texthandler);
+			
+			pid = id + ".blended";
+			bind(pid, t->blended);
+			t->blended = eval(sig[pid], false);
+			hook(pid, (component::call)&renderer::texthandler);
+			
+			pid = id + ".font";
+			bind(pid, t->font);
+			t->font = sig[pid];
+			hook(pid, (component::call)&renderer::texthandler);
+			
+			pid = id + ".font.size";
+			bind(pid, t->fontsz);
+			t->fontsz = eval<int>(sig[pid], 10);
+			hook(pid, (component::call)&renderer::texthandler);
+			
+			pid = id + ".font.r";
+			bind(pid, t->r);
+			t->r = eval(sig[pid], 0.0f);
+			hook(pid, (component::call)&renderer::texthandler);
+			
+			pid = id + ".font.g";
+			bind(pid, t->g);
+			t->g = eval(sig[pid], 0.0f);
+			hook(pid, (component::call)&renderer::texthandler);
+			
+			pid = id + ".font.b";
+			bind(pid, t->b);
+			t->b = eval(sig[pid], 0.0f);
+			hook(pid, (component::call)&renderer::texthandler);
+			
+			pid = id + ".styles";
+			bind(pid, t->styles);
+			t->styles = sig[pid];
+			hook(pid, (component::call)&renderer::texthandler);
+		}
 		
 		// split and iterates through the surface list, loading them
 		// and binding id and position parameters
@@ -388,52 +419,7 @@ class renderer : public component::base {
 		}
 		
 		void loadtexts(string textlist) {
-			if (textlist != "") {
-				set<string> texts;
-				split(texts, textlist, ' ');
-				string pid;
-				while (!texts.empty()) {
-					const string & id = *texts.begin();
-					textdef * t = new textdef(this, id);
-					pid = id + ".text";
-					bind(pid, t->text);
-					hook(pid);
-					
-					pid = id + ".blended";
-					bind(pid, t->blended);
-					hook(pid);
-					
-					pid = id + ".font";
-					bind(pid, t->font);
-					hook(pid);
-					
-					pid = id + ".font.size";
-					bind(pid, t->fontsz);
-					hook(pid);
-					
-					pid = id + ".font.r";
-					bind(pid, t->r);
-					hook(pid);
-					
-					pid = id + ".font.g";
-					bind(pid, t->g);
-					hook(pid);
-					
-					pid = id + ".font.b";
-					bind(pid, t->b);
-					hook(pid);
-					
-					pid = id + ".styles";
-					bind(pid, t->styles);
-					hook(pid);
-					
-					// this will create the surface,
-					// bind the values
-					// and hook to zordering
-					prepare(id, t->render());
-					texts.erase(id);
-				}
-			}
+
 		}
 		
 		surface * prepare(string id, SDL_Surface * raw) {
@@ -456,7 +442,12 @@ class renderer : public component::base {
 			bind(id + ".render", s->render);
 			bind(id + ".absolute", s->absolute);
 			bind(id + ".alpha", s->alpha);
-			hook(id + ".position.z");
+			bind(id + ".zoom", s->zoom);
+			
+			hook(id + ".position.z", (component::call)&renderer::zhandler);
+			hook(id + ".zoom", (component::call)&renderer::zoomhandler);
+			hook(id + ".position.rotation", (component::call)&renderer::rotationhandler);
+			
 			return s;
 		}
 		
@@ -485,7 +476,6 @@ class renderer : public component::base {
 			SDL_Rect dstrect;
 			SDL_Rect srcrect;
 			SDL_Surface * target;
-			SDL_Surface * rotated = NULL;
 			for (set<zorder>::iterator i = zordered.begin(); i != zordered.end(); i++) {
 				surface * s = i->second;
 				dstrect.x = dstrect.y = 0;
@@ -499,21 +489,20 @@ class renderer : public component::base {
 				dstrect.x += s->x;
 				dstrect.y += s->y;
 				srcrect = s->clip;
-				target = s->raw;
+				if (s->rotozoomed != NULL)	target = s->rotozoomed;
+				else target = s->raw;
 				SDL_SetAlpha(target, SDL_SRCALPHA | SDL_RLEACCEL, s->alpha * 255);
-				if (s->rotation != 0.0f) {
-					rotated = rotozoomSurface(s->raw, s->rotation, 1.0f, 1);
-					dstrect.x = (s->w/2 - rotated->w/2) - s->w/2 + dstrect.x;
-					dstrect.y = (s->h/2 - rotated->h/2) - s->h/2 + dstrect.y;
-					srcrect.w += (rotated->w - srcrect.w);
-					srcrect.h += (rotated->h - srcrect.h);
-					target = rotated;
+				if (s->dirty) {
+					if (s->rotozoomed != NULL) SDL_FreeSurface(s->rotozoomed);
+					s->rotozoomed = rotozoomSurface(s->raw, s->rotation, s->zoom, 1);
+					dstrect.x = (s->w/2 - s->rotozoomed->w/2) - s->w/2 + dstrect.x;
+					dstrect.y = (s->h/2 - s->rotozoomed->h/2) - s->h/2 + dstrect.y;
+					srcrect.w += (s->rotozoomed->w - srcrect.w);
+					srcrect.h += (s->rotozoomed->h - srcrect.h);
+					target = s->rotozoomed;
+					s->dirty = false;
 				}
 				SDL_BlitSurface(target, &srcrect, screen, &dstrect);
-				if (rotated != NULL) {
-					SDL_FreeSurface(rotated);
-					rotated = NULL;
-				}
 			}
 			SDL_Flip(screen);
 			SDL_Delay(1);
