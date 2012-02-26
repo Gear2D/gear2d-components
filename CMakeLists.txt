@@ -21,14 +21,13 @@ if (WIN32)
 	)
 	
 	find_path(GEAR2D_INCLUDE_DIR gear2d.h
-	  PATHS
+		PATHS
 		"C:\\Program Files\\Gear2D\\include"
 		"C:\\Program Files (x86)\\Gear2D\\include"
 		"C:\\Gear2D\\include"
 		"C:\\Program Files\\Gear2D\\include\\gear2d"
 		"C:\\Program Files (x86)\\Gear2D\\include\\gear2d"
-		"C:\\Gear2D\\include\\gear2d"		
-		
+		"C:\\Gear2D\\include\\gear2d"
 	)
 	# TODO: Add home folders?
 elseif (APPLE)
