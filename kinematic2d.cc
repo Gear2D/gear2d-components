@@ -18,7 +18,6 @@
  * @b provides
  * @li @c x.accel Acceleration for the x axis @b float
  * @li @c x.accel.{min|max} Minimum and maximum for acceleration on x axis @b float
- * 
  * @li @c y.accel Acceleration for the y axis @b float
  * @li @c y.accel.{min|max} Minimum and maximum for acceleration on y axis @b float
  * 

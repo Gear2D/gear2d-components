@@ -15,10 +15,18 @@ if (WIN32)
 	find_path(
 		GEAR2D_LINK_DIR libgear2d.dll
 		PATHS
-		"C:\\Program Files\\Gear2D\\lib"
-		"C:\\Program Files (x86)\\Gear2D\\lib"
-		"C:\\Gear2D\\lib"
+		"C:\\Program Files\\Gear2D\\bin"
+		"C:\\Program Files (x86)\\Gear2D\\bin"
+		"C:\\Gear2D\\bin"
 	)
+	
+	find_path(GEAR2D_INCLUDE_DIR gear2d.h
+	  PATHS
+		"C:\\Program Files\\Gear2D\\include"
+		"C:\\Program Files (x86)\\Gear2D\\include"
+		"C:\\Gear2D\\include"
+	)
+	# TODO: Add home folders?
 elseif (APPLE)
 	# TODO: Where does mac stores it?
 	find_path(GEAR2D_LINK_DIR libgear2d.dylib)
