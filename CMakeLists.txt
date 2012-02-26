@@ -25,6 +25,10 @@ if (WIN32)
 		"C:\\Program Files\\Gear2D\\include"
 		"C:\\Program Files (x86)\\Gear2D\\include"
 		"C:\\Gear2D\\include"
+		"C:\\Program Files\\Gear2D\\include\\gear2d"
+		"C:\\Program Files (x86)\\Gear2D\\include\\gear2d"
+		"C:\\Gear2D\\include\\gear2d"		
+		
 	)
 	# TODO: Add home folders?
 elseif (APPLE)
