@@ -50,6 +50,7 @@ link_directories(${GEAR2D_LINK_DIR})
 add_library(space2d MODULE space2d.cc)
 add_library(kinematic2d MODULE kinematic2d.cc)
 add_library(renderer MODULE renderer.cc)
+add_library(glrenderer MODULE glrenderer/glrenderer.cc glrenderer/resize++.cpp)
 add_library(keyboard MODULE keyboard.cc)
 add_library(mouse MODULE mouse.cc)
 add_library(mouseover MODULE mouseover.cc)
@@ -73,6 +74,10 @@ install(TARGETS kinematic2d
 )
 
 install(TARGETS renderer
+		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
+)
+
+install(TARGETS glrenderer
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
 )
 
@@ -116,6 +121,7 @@ target_link_libraries(mouseover gear2d)
 target_link_libraries(keyboard SDL gear2d)
 target_link_libraries(mouse SDL gear2d)
 target_link_libraries(renderer SDL SDL_image SDL_ttf SDL_gfx gear2d)
+target_link_libraries(glrenderer SDL SDL_image SDL_ttf GLEW GLU GLU GL gear2d)
 target_link_libraries(audiosource SDL SDL_mixer gear2d)
 target_link_libraries(space2d gear2d)
 target_link_libraries(kinematic2d gear2d)

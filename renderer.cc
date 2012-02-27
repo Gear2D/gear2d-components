@@ -451,8 +451,7 @@ class renderer : public component::base {
 			return s;
 		}
 		
-
-		
+	
 		static SDL_Surface * getraw(string file, bool reload = false) {
 			SDL_Surface * tmp, *s;
 			if ((s = rawbyfile[file]) != 0 && reload == false) { return s; }
