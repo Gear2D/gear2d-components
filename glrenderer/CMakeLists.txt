@@ -11,7 +11,7 @@ install(TARGETS glrenderer
 
 set(GLEW "GLEW")
 set(GLU "GLU")
-set(GLUT "freeglut")
+set(GLUT "glut")
 if (WIN32)
 	set(GLEW "glew32.lib")
 	set(GLU "glu32.lib")
