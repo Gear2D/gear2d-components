@@ -4,4 +4,4 @@ project(gear2d)
 file(GLOB win32dlls "*.dll")
 
 install(FILES ${win32dlls}
-		DESTINATION "${Gear2D_LINK_DIR}")
+		DESTINATION bin)
