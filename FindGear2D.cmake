@@ -7,6 +7,10 @@
 # Gear2D_INCLUDE_DIR, where to find gear2d.h
 # Gear2D_LINK_DIR, where to find gear2d.so/gear2d.dll
 
+if(Gear2D_FOUND)
+	return()
+endif(Gear2D_FOUND)
+
 if (WIN32)
 	find_path(Gear2D_INCLUDE_DIR gear2d.h
 		HINTS
