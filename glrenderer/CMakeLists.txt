@@ -9,4 +9,16 @@ install(TARGETS glrenderer
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
 )
 
-target_link_libraries(glrenderer SDL SDL_image SDL_ttf GLEW GLU GL gear2d)
+set(GLEW "GLEW")
+set(GLU "GLU")
+set(GLUT "freeglut")
+if (WIN32)
+	set(GLEW "glew32.lib")
+	set(GLU "glu32.lib")
+	set(GLUT "freeglut")
+	if("${OpenGL_LIBRARY}" STREQUAL "")
+		set(OpenGL_LIBRARY "opengl32")
+	endif("${OpenGL_LIBRARY}" STREQUAL "")
+endif(WIN32)
+
+target_link_libraries(glrenderer SDL SDL_image SDL_ttf ${Gear2D_LIBRARY} ${GLEW} ${GLU} ${GLUT} ${OpenGL_LIBRARY})
