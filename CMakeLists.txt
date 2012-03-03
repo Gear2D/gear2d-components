@@ -11,7 +11,6 @@ find_package(Gear2D REQUIRED)
 
 add_library(space2d MODULE space2d.cc)
 add_library(kinematic2d MODULE kinematic2d.cc)
-add_library(renderer MODULE renderer.cc)
 add_library(keyboard MODULE keyboard.cc)
 add_library(mouse MODULE mouse.cc)
 add_library(mouseover MODULE mouseover.cc)
@@ -24,8 +23,9 @@ add_library(spritesheet MODULE spritesheet.cc)
 
 set(COMPONENT_INSTALL_DIR lib/gear2d/component)
 
-include_directories(${Gear2D_INCLUDE_DIR})
-include_directories(${SDL_INCLUDE_DIR})
+
+
+include_directories(${Gear2D_INCLUDE_DIR} ${SDL_INCLUDE_DIR})
 link_directories(${Gear2D_LINK_DIR})
 
 install(TARGETS space2d
@@ -34,10 +34,6 @@ install(TARGETS space2d
 
 install(TARGETS kinematic2d
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/kinematics
-)
-
-install(TARGETS renderer
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
 )
 
 install(TARGETS keyboard
@@ -76,25 +72,28 @@ install(TARGETS spritesheet
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/animation
 )
 
-target_link_libraries(mouseover gear2d)
-target_link_libraries(keyboard SDL gear2d)
-target_link_libraries(mouse SDL gear2d)
-target_link_libraries(renderer SDL SDL_image SDL_ttf SDL_gfx gear2d)
-target_link_libraries(audiosource SDL SDL_mixer gear2d)
-target_link_libraries(space2d gear2d)
-target_link_libraries(kinematic2d gear2d)
-target_link_libraries(charactercontroller gear2d)
-target_link_libraries(collider2d gear2d)
-target_link_libraries(rigidbody2d gear2d)
-target_link_libraries(singleselect gear2d)
-target_link_libraries(spritesheet gear2d)
+target_link_libraries(mouseover ${Gear2D_LIBRARY})
+target_link_libraries(keyboard ${SDL_LIBRARY} ${Gear2D_LIBRARY})
+target_link_libraries(mouse ${SDL_LIBRARY} ${Gear2D_LIBRARY})
+target_link_libraries(audiosource ${SDL_LIBRARY} SDL_mixer ${Gear2D_LIBRARY})
+target_link_libraries(space2d ${Gear2D_LIBRARY})
+target_link_libraries(kinematic2d ${Gear2D_LIBRARY})
+target_link_libraries(charactercontroller ${Gear2D_LIBRARY})
+target_link_libraries(collider2d ${Gear2D_LIBRARY})
+target_link_libraries(rigidbody2d ${Gear2D_LIBRARY})
+target_link_libraries(singleselect ${Gear2D_LIBRARY})
+target_link_libraries(spritesheet ${Gear2D_LIBRARY})
 
 add_subdirectory(glrenderer)
+add_subdirectory(renderer)
+
+if (WIN32)
+	add_subdirectory(thirdparty/win32)
+endif (WIN32)
 
 if (WIN32)
 	set(CPACK_SOURCE_GENERATOR ZIP)
 	set(CPACK_GENERATOR NSIS;ZIP)
-	add_subdirectory(thirdparty/win32)
 	set(CPACK_NSIS_MODIFY_PATH ON)
 	set(CPACK_PACKAGE_NAME "Gear2D-Components")
 elseif(UNIX)
@@ -114,6 +113,9 @@ set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
 set(CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/README)
 
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.bin")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+if (NOT WIN32)
+	set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.bin")
+endif
 
 include(CPack)
