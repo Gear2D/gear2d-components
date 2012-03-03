@@ -24,7 +24,7 @@ SDL_Surface * glrenderer::screen = 0;
 bool glrenderer::initialized = false;
 int glrenderer::rendervotes = 0;
 
-int glrenderer::glverctorsize = 0;
+int glrenderer::glvectorsize = 0;
 float * glrenderer::glvertices = 0;
 float * glrenderer::gltextures = 0;
 
@@ -284,8 +284,8 @@ void glrenderer::render() {
 	if (glvectorsize == 0) glvectorsize = renderers.size();
 	if (renderers.size() > glvectorsize) {
 		glvectorsize <<= 2;
-		glvertices = realloc(glvertices, glvectorsize * 12);
-		gltextures = realloc(gltextures, glvectorsize * 8);
+		glvertices = (float *) realloc(glvertices, glvectorsize * 12);
+		gltextures = (float *) realloc(gltextures, glvectorsize * 8);
 	}
 }
 
