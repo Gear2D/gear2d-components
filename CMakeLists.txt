@@ -1,56 +1,17 @@
 project(gear2d)
 cmake_minimum_required(VERSION 2.6)
+
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
+
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
 find_package(SDL_mixer REQUIRED)
 find_package(SDL_ttf REQUIRED)
-
-find_path(GEAR2D_INCLUDE_DIR gear2d.h
-	PATHS
-	/usr/include/gear2d
-	/usr/local/include/gear2d
-	/opt/include/gear2d
-)
-if (WIN32)
-	find_path(
-		GEAR2D_LINK_DIR libgear2d.dll
-		PATHS
-		"C:\\Program Files\\Gear2D\\bin"
-		"C:\\Program Files (x86)\\Gear2D\\bin"
-		"C:\\Gear2D\\bin"
-	)
-	
-	find_path(GEAR2D_INCLUDE_DIR gear2d.h
-		PATHS
-		"C:\\Program Files\\Gear2D\\include"
-		"C:\\Program Files (x86)\\Gear2D\\include"
-		"C:\\Gear2D\\include"
-		"C:\\Program Files\\Gear2D\\include\\gear2d"
-		"C:\\Program Files (x86)\\Gear2D\\include\\gear2d"
-		"C:\\Gear2D\\include\\gear2d"
-	)
-	# TODO: Add home folders?
-elseif (APPLE)
-	# TODO: Where does mac stores it?
-	find_path(GEAR2D_LINK_DIR libgear2d.dylib)
-else ()
-	find_path(GEAR2D_LINK_DIR libgear2d.so
-		/usr/lib
-		/usr/local/lib
-		/opt/lib
-	)
-endif(WIN32)
-			
-message("Gear2D include dir: ${GEAR2D_INCLUDE_DIR}")
-message("Gear2D libdir: ${GEAR2D_LINK_DIR}")
-
-include_directories(${GEAR2D_INCLUDE_DIR})
-link_directories(${GEAR2D_LINK_DIR})
+find_package(Gear2D REQUIRED)
 
 add_library(space2d MODULE space2d.cc)
 add_library(kinematic2d MODULE kinematic2d.cc)
 add_library(renderer MODULE renderer.cc)
-add_library(glrenderer MODULE glrenderer/glrenderer.cc glrenderer/resize++.cpp)
 add_library(keyboard MODULE keyboard.cc)
 add_library(mouse MODULE mouse.cc)
 add_library(mouseover MODULE mouseover.cc)
@@ -61,9 +22,11 @@ add_library(audiosource MODULE audiosource.cc)
 add_library(singleselect MODULE singleselect.cc)
 add_library(spritesheet MODULE spritesheet.cc)
 
-set (COMPONENT_INSTALL_DIR lib/gear2d/component)
+set(COMPONENT_INSTALL_DIR lib/gear2d/component)
 
+include_directories(${Gear2D_INCLUDE_DIR})
 include_directories(${SDL_INCLUDE_DIR})
+link_directories(${Gear2D_LINK_DIR})
 
 install(TARGETS space2d
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/spatial
@@ -74,10 +37,6 @@ install(TARGETS kinematic2d
 )
 
 install(TARGETS renderer
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
-)
-
-install(TARGETS glrenderer
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
 )
 
@@ -121,7 +80,6 @@ target_link_libraries(mouseover gear2d)
 target_link_libraries(keyboard SDL gear2d)
 target_link_libraries(mouse SDL gear2d)
 target_link_libraries(renderer SDL SDL_image SDL_ttf SDL_gfx gear2d)
-target_link_libraries(glrenderer SDL SDL_image SDL_ttf GLEW GLU GLU GL gear2d)
 target_link_libraries(audiosource SDL SDL_mixer gear2d)
 target_link_libraries(space2d gear2d)
 target_link_libraries(kinematic2d gear2d)
@@ -130,3 +88,32 @@ target_link_libraries(collider2d gear2d)
 target_link_libraries(rigidbody2d gear2d)
 target_link_libraries(singleselect gear2d)
 target_link_libraries(spritesheet gear2d)
+
+add_subdirectory(glrenderer)
+
+if (WIN32)
+	set(CPACK_SOURCE_GENERATOR ZIP)
+	set(CPACK_GENERATOR NSIS;ZIP)
+	add_subdirectory(thirdparty/win32)
+	set(CPACK_NSIS_MODIFY_PATH ON)
+	set(CPACK_PACKAGE_NAME "Gear2D-Components")
+elseif(UNIX)
+	set(CPACK_PACKAGE_NAME "gear2d-components")
+	set(CPACK_SOURCE_GENERATOR TGZ)
+	set(CPACK_GENERATOR TGZ)
+endif()
+
+set(CPACK_PACKAGE_VENDOR "Gear2D Labs")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "gear2d")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Gear2D - Component-based game engine")
+set(CPACK_PACKAGE_VERSION ${Gear2D_VERSION})
+
+set(CPACK_SOURCE_IGNORE_FILES "\\\\.git.*;${CMAKE_BINARY_DIR}/.*;.*~;\\\\.kdev4/.*;.*\\\\.kdev4;.*\\\\.swp")
+set(PACK_PACKAGE_EXECUTABLES gear2d;Gear2D Game Engine)
+set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE)
+set(CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/README)
+
+set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.bin")
+
+include(CPack)
