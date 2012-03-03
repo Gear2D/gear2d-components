@@ -12,11 +12,11 @@ if (WIN32)
 		HINTS
 		$ENV{GEAR2DDIR}
 		PATHS
-		"C:\\$ENV{PROGRAMFILES}\\Gear2D\\include"
-		"C:\\$ENV{PROGRAMFILES(X86)}\\Gear2D\\include"
+		"$ENV{PROGRAMFILES}\\Gear2D\\include"
+		"$ENV{PROGRAMFILES(X86)}\\Gear2D\\include"
 		"C:\\Gear2D\\include"
-		"C:\\$ENV{PROGRAMFILES}\\Gear2D\\include\\gear2d"
-		"C:\\$ENV{PROGRAMFILES(X86)}\\Gear2D\\include\\gear2d"
+		"$ENV{PROGRAMFILES}\\Gear2D\\include\\gear2d"
+		"$ENV{PROGRAMFILES(X86)}\\Gear2D\\include\\gear2d"
 		"C:\\Gear2D\\include\\gear2d"
 	)
 	
