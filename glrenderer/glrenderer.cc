@@ -16,6 +16,7 @@ using namespace std;
 using namespace gear2d;
 
 /* static things */
+map<string, texturedef> glrenderer::rawbyfile;
 int glrenderer::texturesize3d;
 int glrenderer::texturedepth3d;
 int glrenderer::texturesize;
