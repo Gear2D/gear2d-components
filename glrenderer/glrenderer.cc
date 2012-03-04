@@ -12,6 +12,9 @@
 
 #include "glimage.h"
 
+#include <limits>
+
+
 using namespace std;
 using namespace gear2d;
 
@@ -28,6 +31,13 @@ int glrenderer::rendervotes = 0;
 int glrenderer::glvectorsize = 0;
 float * glrenderer::glvertices = 0;
 float * glrenderer::gltextures = 0;
+
+glrenderer::renderset glrenderer::renderqueue;
+
+double glrenderer::viewleft;
+double glrenderer::viewright;
+double glrenderer::viewtop;
+double glrenderer::viewbottom;
 
 
 void glrenderer::initializegl(int w, int h) {
@@ -51,18 +61,19 @@ void glrenderer::initializegl(int w, int h) {
 	//glEnable(GL_TEXTURE_2D);
 	//glEnable(GL_TEXTURE_2D_ARRAY_EXT);
 	//glEnable(GL_TEXTURE_2D_ARRAY);
-	glEnable(GL_TEXTURE_3D);
+	glEnable(GL_TEXTURE_2D);
 	
 		// shading mathod: GL_SMOOTH or GL_FLAT
 	//glShadeModel(GL_FLAT);
 
 	// background color
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(0.0, .4, 0.0, 0.0);
 
 	/* Depth buffer setup */
-	glClearDepth(1.0);
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
+// 	glClearDepth(1.0);
+// 	glEnable(GL_DEPTH_TEST);
+// 	glDepthFunc(GL_LEQUAL);
+	glDisable(GL_DEPTH_TEST);
 
 	// Perspective Calculations: GL_NICEST or GL_FASTEST  */
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
@@ -70,14 +81,14 @@ void glrenderer::initializegl(int w, int h) {
 	//glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
 
 	// Enable Blending
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	//glEnable(GL_BLEND);
+// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+// 	glEnable(GL_BLEND);
 	glDisable(GL_BLEND);
 
-	glEnable(GL_CULL_FACE);
-	//glDisable(GL_CULL_FACE);
-	glCullFace(GL_FRONT);
-	glFrontFace(GL_CCW);
+// 	glEnable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
+// 	glCullFace(GL_FRONT);
+// 	glFrontFace(GL_CCW);
 
 	//glClearStencil(0);                          // clear stencil buffer
 	glClearDepth(1.0f);                         // 0 is near, 1 is far
@@ -93,8 +104,13 @@ void glrenderer::initializegl(int w, int h) {
 	// Reset The View
 	glLoadIdentity();
 	// Set our perspective
+	viewleft = -(w/2.0f);
+	viewright = w/2.0f;
+	viewtop = -h/2.0f;
+	viewbottom = h/2.0f;
 	
-	gluPerspective(50.0, (GLfloat)(((float)w) / ((float)h)), 0.1f, 100.0f);
+	glOrtho(viewleft, viewright, viewbottom, viewtop, -1.0f, 1.0);
+// 	gluPerspective(50.0, (GLfloat)(((float)w) / ((float)h)), 0.1f, 100.0f);
 }
 
 /* hook for a renderer.surfaces change */
@@ -111,8 +127,16 @@ glrenderer::glrenderer() {
 	renderers.push_back(this);
 }
 
+/* destroys the glimage, which decreases the count of texturedefs */
 glrenderer::~glrenderer() {
 	renderers.remove(this);
+	while (!surfacebyid.empty()) {
+		glimage * img = (surfacebyid.begin()->second);
+		renderqueue.erase(img);
+		surfacebyid.erase(surfacebyid.begin());
+		
+		delete img;
+	}
 }
 
 void glrenderer::setup(object::signature & sig) {
@@ -120,7 +144,6 @@ void glrenderer::setup(object::signature & sig) {
 	int w = eval(sig["renderer.w"], 800);
 	int h = eval(sig["renderer.h"], 600);
 	int bpp = eval(sig["renderer.bpp"], 32);
-	if (!initialized) initialize(w, h, bpp);
 	write("renderer.w", w);
 	write("renderer.h", h);
 	write("renderer.bpp", bpp);
@@ -177,21 +200,20 @@ void glrenderer::loadsurfaces(string surfacelist, string imgpath) {
 		string id = surfacedef->substr(0, p);
 		string file = surfacedef->substr(p+1);
 		if (surfacebyid[id] != 0) continue;
-		texturedef tex = getraw(imgpath + file, false);
+		texturedef & tex = getraw(imgpath + file, false);
 		glimage * img = prepare(id, tex);
+		renderqueue.insert(img);
 	}
 }
 
 
-texturedef glrenderer::getraw(string path, bool reload = false) {
+texturedef & glrenderer::getraw(string path, bool reload = false) {
 	if (rawbyfile.find(path) != rawbyfile.end()) return rawbyfile[path];
 	SDL_Surface * tmp = IMG_Load(path.c_str()), *resized = 0, *s = 0;
 	if (tmp == 0) {
 		throw evil(string("(Renderer component) Not able to load ") + path + ": " + SDL_GetError());
 	}
 
-	SDL_FreeSurface(tmp);
-	
 	int val = max(tmp->w, tmp->h);
 	val--;
 	val = (val >> 1) | val;
@@ -203,24 +225,24 @@ texturedef glrenderer::getraw(string path, bool reload = false) {
 	
 	val = max(val, glrenderer::texturesize);
 	
-	resized = SDL_Resize(tmp, val, val);
+	resized = SDL_Resize(tmp, val, val, false);
 	SDL_FreeSurface(tmp);
 	
 	
-	if (resized->format->Amask != 0) {
-		SDL_SetAlpha(resized, SDL_RLEACCEL | SDL_SRCALPHA, 255);
-		s = SDL_DisplayFormatAlpha(resized);
-	} else {
-		SDL_SetColorKey(resized, SDL_RLEACCEL | SDL_SRCCOLORKEY, SDL_MapRGB(resized->format, 0xff, 0, 0xff));
-		s = SDL_DisplayFormat(resized);
-	}
+// 	if (resized->format->Amask != 0) {
+// 		SDL_SetAlpha(resized, SDL_RLEACCEL | SDL_SRCALPHA, 255);
+// 		s = SDL_DisplayFormatAlpha(resized);
+// 	} else {
+// 		SDL_SetColorKey(resized, SDL_RLEACCEL | SDL_SRCCOLORKEY, SDL_MapRGB(resized->format, 0xff, 0, 0xff));
+// 		s = SDL_DisplayFormat(resized);
+// 	}
 
-	if (s == 0) {
-		s = resized;
-	} else {
-		SDL_FreeSurface(resized);
-	}
-	
+// 	if (s == 0) {
+// 		s = resized;
+// 	} else {
+// 		SDL_FreeSurface(resized);
+// 	}
+	s = resized;
 	texturedef tex(0, 0, s->w, s->h);
 	
 	glGenTextures(1, &tex.id);
@@ -228,8 +250,8 @@ texturedef glrenderer::getraw(string path, bool reload = false) {
 	// load images as 2d texture array
 	glBindTexture( GL_TEXTURE_2D, tex.id);
 
-// 	glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Use GL_LINEAR to turn on interpolation
-// 	glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use GL_NEAREST to turn off interpolation
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Use GL_LINEAR to turn on interpolation
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // Use GL_NEAREST to turn off interpolation
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
@@ -245,12 +267,13 @@ texturedef glrenderer::getraw(string path, bool reload = false) {
 	
 	SDL_FreeSurface(s);
 	
-	return tex;
+	return rawbyfile[path];
 }
 
-glimage * glrenderer::prepare(string id, texturedef tex) {
+glimage * glrenderer::prepare(string id, texturedef & tex) {
 	glimage * s = new glimage(this, id, tex);
 	surfacebyid[id] = s;
+	
 	
 	// these will bind param names to our data
 	bind(id + ".position.x", s->x);
@@ -281,13 +304,97 @@ void glrenderer::update(timediff dt) {
 	}
 }
 
-void glrenderer::render() {
-	if (glvectorsize == 0) glvectorsize = renderers.size();
+void glrenderer::populate() {
 	if (renderers.size() > glvectorsize) {
-		glvectorsize <<= 2;
+		if (glvectorsize == 0) glvectorsize = renderers.size();
+		glvectorsize <<= 1;
 		glvertices = (float *) realloc(glvertices, glvectorsize * 12);
 		gltextures = (float *) realloc(gltextures, glvectorsize * 8);
 	}
+	int v = 0;
+	int t = 0;
+	for (renderset::iterator i = renderqueue.begin(); i != renderqueue.end(); i++) {
+		glimage * img = *i;
+		
+		/* clock-wise */
+		
+		/* vertices */
+		glvertices[v++] = img->x;
+		glvertices[v++] = img->y;
+		glvertices[v++] = img->z;
+		
+		/* clip/attach point */
+		gltextures[t++] = 0;
+		gltextures[t++] = 0;
+		
+		
+		/* vertices */
+		glvertices[v++] = img->x + img->w;
+		glvertices[v++] = img->y;
+		glvertices[v++] = img->z;
+		
+		/* clip/attach point */
+		gltextures[t++] = 1;
+		gltextures[t++] = 0;
+		
+		/* vertices */
+		glvertices[v++] = img->x + img->w;
+		glvertices[v++] = img->y + img->h;
+		glvertices[v++] = img->z;
+		
+		/* clip/attach point */
+		gltextures[t++] = 1;
+		gltextures[t++] = 1;
+		
+		/* vertices */
+		glvertices[v++] = img->x;
+		glvertices[v++] = img->y + img->h;
+		glvertices[v++] = img->z;
+		
+		/* clip/attach point */
+		gltextures[t++] = 0;
+		gltextures[t++] = 1;
+		
+		/* TODO: clipping */
+	}
+}
+
+void glrenderer::render() {
+	populate();
+	
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	
+	glOrtho(viewleft, viewright, viewbottom, viewtop, -1.0f, 1.0);
+	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	
+	glTexCoordPointer(2, GL_FLOAT, 0, gltextures);
+	glVertexPointer(3, GL_FLOAT, 0, glvertices);
+	
+	texturedef tex = (*renderqueue.begin())->tex;
+	int start = -1;
+	for (renderset::iterator i = renderqueue.begin(); i != renderqueue.end(); ++i) {
+		if (tex.id == (*i)->tex.id) { ++start; continue; }
+		
+		/* new texture id */
+		glBindTexture(GL_TEXTURE_2D, tex.id);
+		glDrawArrays(GL_QUADS, start * 3, tex.count * 3);
+		tex = (*i)->tex;
+	}
+	/* last texture */
+	glBindTexture(GL_TEXTURE_2D, tex.id);
+	glDrawArrays(GL_QUADS, start * 3, tex.count * 3);
+
+	/* house cleaning? */
+	glBindTexture(GL_TEXTURE_2D, 0);
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	
+	SDL_GL_SwapBuffers();
 }
 
 

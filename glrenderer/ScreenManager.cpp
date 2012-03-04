@@ -5,7 +5,7 @@
  *      Author: Aeradon
  */
 
-#include "../INC/ScreenManager.h"
+#include "ScreenManager.h"
 
 ScreenManager* ScreenManager::instance = NULL;
 

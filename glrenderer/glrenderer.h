@@ -69,7 +69,7 @@ class glrenderer : public component::base {
 		void loadsurfaces(string surfacelist, string imgpath = "");
 		
 		/* prepare an glimage based on a texture definition */
-		glimage * prepare(string id, texturedef tex);
+		glimage * prepare(string id, texturedef & tex);
 		
 	private:
 		/* basic component initialization */
@@ -79,10 +79,11 @@ class glrenderer : public component::base {
 		static void initializegl(int w, int h);
 		
 		/* render everyone */
+		static void populate();
 		static void render();
 		
 		/* loads a texture def based on a image file */
-		static texturedef getraw(string path, bool reload);
+		static texturedef & getraw(string path, bool reload);
 		
 		
 	/* links */
@@ -106,6 +107,12 @@ class glrenderer : public component::base {
 		static int texturesize;
 		static int texturesize3d;
 		static int texturedepth3d;
+		
+		static double viewleft;
+		static double viewright;
+		static double viewtop;
+		static double viewbottom;
+		
 		static list<glrenderer *> renderers;
 		static int rendervotes;
 		
@@ -114,6 +121,12 @@ class glrenderer : public component::base {
 		static float * gltextures;
 		
 		static map<string, texturedef> rawbyfile;
+		
+		
+		typedef set<glimage *, glimagecmp> renderset;
+		static renderset renderqueue;
+		
+		
 };
 
 #endif

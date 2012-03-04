@@ -7,11 +7,14 @@
 using namespace gear2d;
 using namespace std;
 
+/* Vulgo SDL_Surface * */
 struct texturedef {
 	unsigned int w, h;
 	unsigned int id, depth;
-	texturedef(int id = 0, int depth = 0, int w = 0, int h = 0) : w(w), h(h) { };
+	unsigned int count;
+	texturedef(int id = 0, int depth = 0, int w = 0, int h = 0) : w(w), h(h), count(0) { };
 };
+
 
 // this handles surface parameters
 struct glimage {
@@ -34,7 +37,8 @@ struct glimage {
 		SDL_Rect clip;
 		
 		// raw surface
-		texturedef tex;
+		texturedef & tex;
+		
 		
 		bool operator<(const glimage & other) const {
 			return (tex.id < other.tex.id || (!(other.tex.id < tex.id) && tex.depth < other.tex.depth));
@@ -66,9 +70,17 @@ struct glimage {
 		, absolute(false)
 		, tex(tex)
 		{
+			tex.count++;
 		}
 		
-		virtual ~glimage() { }
+		virtual ~glimage() { tex.count--; }
+};
+
+/* compares two pointers of glimage */
+struct glimagecmp {
+	bool operator()(glimage * lhs, glimage * rhs) {
+		return (*lhs < * rhs);
+	}
 };
 
 #endif
