@@ -10,9 +10,10 @@ using namespace std;
 /* Vulgo SDL_Surface * */
 struct texturedef {
 	unsigned int w, h;
+	unsigned int realw, realh;
 	unsigned int id, depth;
 	unsigned int count;
-	texturedef(int id = 0, int depth = 0, int w = 0, int h = 0) : w(w), h(h), count(0) { };
+	texturedef(int id = 0, int depth = 0, int w = 0, int h = 0, int realw = 0, int realh = 0) : w(w), h(h), realw(realw), realh(realh), count(0) { };
 };
 
 
@@ -63,8 +64,8 @@ struct glimage {
 		, z(0.0f)
 		, rotation(0.0f)
 		, zoom(1.0f)
-		, w(tex.w)
-		, h(tex.h)
+		, w(tex.realw)
+		, h(tex.realh)
 		, alpha(1.0f)
 		, bind(true)
 		, absolute(false)

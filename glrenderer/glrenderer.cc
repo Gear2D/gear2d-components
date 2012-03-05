@@ -67,13 +67,13 @@ void glrenderer::initializegl(int w, int h) {
 	//glShadeModel(GL_FLAT);
 
 	// background color
-	glClearColor(0.0, .4, 0.0, 0.0);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
 
 	/* Depth buffer setup */
-// 	glClearDepth(1.0);
-// 	glEnable(GL_DEPTH_TEST);
-// 	glDepthFunc(GL_LEQUAL);
-	glDisable(GL_DEPTH_TEST);
+	glClearDepth(1000.0);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+// 	glDisable(GL_DEPTH_TEST);
 
 	// Perspective Calculations: GL_NICEST or GL_FASTEST  */
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
@@ -81,17 +81,16 @@ void glrenderer::initializegl(int w, int h) {
 	//glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
 
 	// Enable Blending
-// 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-// 	glEnable(GL_BLEND);
-	glDisable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+// 	glDisable(GL_BLEND);
 
-// 	glEnable(GL_CULL_FACE);
 	glDisable(GL_CULL_FACE);
-// 	glCullFace(GL_FRONT);
 // 	glFrontFace(GL_CCW);
+// 	glEnable(GL_CULL_FACE);
 
 	//glClearStencil(0);                          // clear stencil buffer
-	glClearDepth(1.0f);                         // 0 is near, 1 is far
+	glClearDepth(1000.0f);                         // 0 is near, 1 is far
 
 	// Lighting initialization
 	// Disable Lightning
@@ -109,7 +108,7 @@ void glrenderer::initializegl(int w, int h) {
 	viewtop = -h/2.0f;
 	viewbottom = h/2.0f;
 	
-	glOrtho(viewleft, viewright, viewbottom, viewtop, -1.0f, 1.0);
+	glOrtho(viewleft, viewright, viewbottom, viewtop, -1000.0f, 1000.0);
 // 	gluPerspective(50.0, (GLfloat)(((float)w) / ((float)h)), 0.1f, 100.0f);
 }
 
@@ -175,14 +174,14 @@ void glrenderer::setup(object::signature & sig) {
 		write(id + ".position.x", eval(sig[id + ".position.x"], 0.0f));
 		write(id + ".position.y", eval(sig[id + ".position.y"], 0.0f));
 		write(id + ".position.z", eval(sig[id + ".position.z"], 0.0f));
-		write(id + ".position.w", eval(sig[id + ".position.w"], s->tex.w));
-		write(id + ".position.h", eval(sig[id + ".position.h"], s->tex.h));
+		write(id + ".position.w", eval(sig[id + ".position.w"], s->w));
+		write(id + ".position.h", eval(sig[id + ".position.h"], s->h));
 		write(id + ".position.rotation", eval(sig[id + ".position.rotation"], 0.0f));
 		write(id + ".zoom", eval(sig[id + ".zoom"], 1.0f));
 		write(id + ".clip.x", eval<int>(sig[id + ".clip.x"], 0));
 		write(id + ".clip.y", eval<int>(sig[id + ".clip.y"], 0));
-		write(id + ".clip.w", eval<int>(sig[id + ".clip.w"], s->tex.w));
-		write(id + ".clip.h", eval<int>(sig[id + ".clip.h"], s->tex.h));
+		write(id + ".clip.w", eval<int>(sig[id + ".clip.w"], s->w));
+		write(id + ".clip.h", eval<int>(sig[id + ".clip.h"], s->h));
 		write(id + ".bind", eval(sig[id + ".bind"], true));
 		write(id + ".absolute", eval<bool>(sig[id + ".absolute"], true));
 		write(id + ".alpha", eval<float>(sig[id + ".alpha"], 1.0f));
@@ -213,7 +212,8 @@ texturedef & glrenderer::getraw(string path, bool reload = false) {
 	if (tmp == 0) {
 		throw evil(string("(Renderer component) Not able to load ") + path + ": " + SDL_GetError());
 	}
-
+	
+	
 	int val = max(tmp->w, tmp->h);
 	val--;
 	val = (val >> 1) | val;
@@ -225,25 +225,18 @@ texturedef & glrenderer::getraw(string path, bool reload = false) {
 	
 	val = max(val, glrenderer::texturesize);
 	
+	
 	resized = SDL_Resize(tmp, val, val, false);
+	if (resized->format->Amask != 0) {
+		SDL_SetAlpha(resized, SDL_RLEACCEL | SDL_SRCALPHA, 255);
+	} else {
+		SDL_SetColorKey(resized, SDL_RLEACCEL | SDL_SRCCOLORKEY, SDL_MapRGB(resized->format, 0xff, 0, 0xff));
+	}
+	s = SDL_DisplayFormatAlpha(resized);
+	if (s == 0) { s = resized; }
+	texturedef tex(0, 0, s->w, s->h, tmp->w, tmp->h);
 	SDL_FreeSurface(tmp);
 	
-	
-// 	if (resized->format->Amask != 0) {
-// 		SDL_SetAlpha(resized, SDL_RLEACCEL | SDL_SRCALPHA, 255);
-// 		s = SDL_DisplayFormatAlpha(resized);
-// 	} else {
-// 		SDL_SetColorKey(resized, SDL_RLEACCEL | SDL_SRCCOLORKEY, SDL_MapRGB(resized->format, 0xff, 0, 0xff));
-// 		s = SDL_DisplayFormat(resized);
-// 	}
-
-// 	if (s == 0) {
-// 		s = resized;
-// 	} else {
-// 		SDL_FreeSurface(resized);
-// 	}
-	s = resized;
-	texturedef tex(0, 0, s->w, s->h);
 	
 	glGenTextures(1, &tex.id);
 	
@@ -259,7 +252,7 @@ texturedef & glrenderer::getraw(string path, bool reload = false) {
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);      // 4-byte pixel alignment
 	
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, val, val, 0, GL_RGBA, GL_UNSIGNED_BYTE, s->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, val, val, 0, GL_BGRA, GL_UNSIGNED_BYTE, s->pixels);
 	
 	glBindTexture( GL_TEXTURE_2D, 0);
 	
@@ -305,12 +298,16 @@ void glrenderer::update(timediff dt) {
 }
 
 void glrenderer::populate() {
-	if (renderers.size() > glvectorsize) {
+	if (glvectorsize == 0) {
 		if (glvectorsize == 0) glvectorsize = renderers.size();
-		glvectorsize <<= 1;
-		glvertices = (float *) realloc(glvertices, glvectorsize * 12);
-		gltextures = (float *) realloc(gltextures, glvectorsize * 8);
+		glvectorsize = 1024;
+// 		glvertices = (float *) realloc(glvertices, glvectorsize * 12);
+// 		gltextures = (float *) realloc(gltextures, glvectorsize * 8);
+		glvertices = (float *) malloc(glvectorsize * 12);
+		gltextures = (float *) malloc(glvectorsize * 8);
+		
 	}
+	
 	int v = 0;
 	int t = 0;
 	for (renderset::iterator i = renderqueue.begin(); i != renderqueue.end(); i++) {
@@ -319,9 +316,19 @@ void glrenderer::populate() {
 		/* clock-wise */
 		
 		/* vertices */
-		glvertices[v++] = img->x;
-		glvertices[v++] = img->y;
-		glvertices[v++] = img->z;
+		float x = img->x - screen->w/2;
+		float y = img->y - screen->h/2;
+		float z = img->z;
+		if (img->bind) {
+			x += img->parent->read<float>("x");
+			y += img->parent->read<float>("y");
+			z += img->parent->read<float>("z");
+		}
+		
+// 		printf("aaa %d %d %d %d\n", img->w, img->tex.realw, img->tex.w, img->tex.id);
+		glvertices[v++] = x;
+		glvertices[v++] = y;
+		glvertices[v++] = z;
 		
 		/* clip/attach point */
 		gltextures[t++] = 0;
@@ -329,27 +336,27 @@ void glrenderer::populate() {
 		
 		
 		/* vertices */
-		glvertices[v++] = img->x + img->w;
-		glvertices[v++] = img->y;
-		glvertices[v++] = img->z;
+		glvertices[v++] = x + img->w;
+		glvertices[v++] = y;
+		glvertices[v++] = z;
 		
 		/* clip/attach point */
 		gltextures[t++] = 1;
 		gltextures[t++] = 0;
 		
 		/* vertices */
-		glvertices[v++] = img->x + img->w;
-		glvertices[v++] = img->y + img->h;
-		glvertices[v++] = img->z;
+		glvertices[v++] = x + img->w;
+		glvertices[v++] = y + img->h;
+		glvertices[v++] = z;
 		
 		/* clip/attach point */
 		gltextures[t++] = 1;
 		gltextures[t++] = 1;
 		
 		/* vertices */
-		glvertices[v++] = img->x;
-		glvertices[v++] = img->y + img->h;
-		glvertices[v++] = img->z;
+		glvertices[v++] = x;
+		glvertices[v++] = y + img->h;
+		glvertices[v++] = z;
 		
 		/* clip/attach point */
 		gltextures[t++] = 0;
@@ -365,7 +372,7 @@ void glrenderer::render() {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
-	glOrtho(viewleft, viewright, viewbottom, viewtop, -1.0f, 1.0);
+	glOrtho(viewleft, viewright, viewbottom, viewtop, -1000.0f, 1000.0);
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -375,18 +382,24 @@ void glrenderer::render() {
 	glVertexPointer(3, GL_FLOAT, 0, glvertices);
 	
 	texturedef tex = (*renderqueue.begin())->tex;
-	int start = -1;
+	int start = -4;
 	for (renderset::iterator i = renderqueue.begin(); i != renderqueue.end(); ++i) {
-		if (tex.id == (*i)->tex.id) { ++start; continue; }
+		if (tex.id == (*i)->tex.id) { start += 4; continue; }
 		
 		/* new texture id */
+// 		printf("casa do xapeu: %d\n", tex.id);
 		glBindTexture(GL_TEXTURE_2D, tex.id);
-		glDrawArrays(GL_QUADS, start * 3, tex.count * 3);
+		glDrawArrays(GL_QUADS, start, tex.count * 4);
+// 		printf("%d\n", start);
+		start += 4;
+	
 		tex = (*i)->tex;
 	}
 	/* last texture */
+// 	printf("%d\n", start);
+// 	printf("casa do xapeu: %d\n", tex.id);
 	glBindTexture(GL_TEXTURE_2D, tex.id);
-	glDrawArrays(GL_QUADS, start * 3, tex.count * 3);
+	glDrawArrays(GL_QUADS, start, tex.count * 4);
 
 	/* house cleaning? */
 	glBindTexture(GL_TEXTURE_2D, 0);
