@@ -149,8 +149,8 @@ class collider : public component::base {
 						// when h bigger than w, side collision first
 						if (inter.h > inter.w) {
 							// test if intercep.x = first x, if so, first collision left
-							if (inter.x == faabb.x) { fc = 0; sc = 2; }
-							else { fc = 2; sc = 0; }
+							if (inter.x == faabb.x) { fc = 2; sc = 0; }
+							else { fc = 0; sc = 2; }
 						} else {
 							if (inter.y == faabb.y) { fc = 1; sc = 3; }
 							else { fc = 3; sc = 1; }
@@ -173,19 +173,16 @@ class collider : public component::base {
 						second->write<float>("collider.collision.speed.x", first->read<float>("x.speed"));
 						second->write<float>("collider.collision.speed.y", first->read<float>("y.speed"));
 						
-// 						cout << "fignore/stag: " << first->ignore << " " << second->tag << endl;
 						if (first->ignore.find(second->tag) == string::npos) {
 							first->write<component::base *>("collider.collision", second);
 						}
 							
-// 						cout << "signore/ftag: " << second->ignore << " " << first->tag << endl;
 						if (second->ignore.find(first->tag) == string::npos) {
 							second->write<component::base *>("collider.collision", first);
 						}
 					}
 				}
 			}
-		
 		}
 		static bool testaabb(colaabb & a, colaabb & b) {
 			return (
