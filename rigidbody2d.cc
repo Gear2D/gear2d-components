@@ -72,9 +72,11 @@ class bounce : public component::base {
 				const float & colyspeed =  raw<float>("collider.collision.speed.y");
 
 				// restore x and y based on speed
-				/*add<float>("x", -xspeed * dt);
-				add<float>("y", -yspeed * dt);*/
+// 				
+// 				
 				
+				add<float>("y", -yspeed * dt);
+				add<float>("x", -xspeed * dt);
 				
 				// adjust x and y to non-colliding positions
 				float resxspeed, resyspeed;
@@ -82,22 +84,25 @@ class bounce : public component::base {
 					resxspeed = ((m1-m2)/(m1+m2))*xspeed + ((2*m2)/(m1+m2))*colxspeed;
 					write<float>("x.speed", resxspeed);
 					add<float>("x", resxspeed * dt);
+					
 					if (side == 0) {
-						add<float>("x", + (read<float>("collider.collision.w") / 2.0 + 1));
+// 						add<float>("x", + (read<float>("collider.collision.w") / 2.0 + 1));
 					} else {
-						add<float>("x", - (read<float>("collider.collision.w") / 2.0 + 1));
+// 						add<float>("x", - (read<float>("collider.collision.w") / 2.0 + 1));
 					}
 				}
 				if (side == 1 || side == 3) {
 					resyspeed = ((m1-m2)/(m1+m2))*yspeed + ((2*m2)/(m1+m2))*colyspeed;
 					write<float>("y.speed", resyspeed);
 					add<float>("y", resyspeed * dt);
+
 					if (side == 1) {
-						add<float>("y", + (read<float>("collider.collision.h") / 2.0 + 1));
+// 						add<float>("y", - (read<float>("collider.collision.h") / 2.0 + 1));
 					} else {
-						add<float>("y", - (read<float>("collider.collision.h") / 2.0 + 1));
+// 						add<float>("y", + (read<float>("collider.collision.h") / 2.0 + 1));
 					}
 				}
+// 				cout << read<int>("cicle") << "  " << owner->name() << " side: " << side << endl;
 			}
 		}
 		
