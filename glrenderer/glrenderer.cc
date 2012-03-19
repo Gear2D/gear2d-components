@@ -11,6 +11,7 @@
 #include "resize++.h"
 
 #include "glimage.h"
+#include "FTGL/ftgl.h"
 
 #include <limits>
 
@@ -33,6 +34,7 @@ float * glrenderer::glvertices = 0;
 float * glrenderer::gltextures = 0;
 
 glrenderer::renderset glrenderer::renderqueue;
+glrenderer::textrenderset glrenderer::textqueue;
 
 double glrenderer::viewleft;
 double glrenderer::viewright;
@@ -105,11 +107,8 @@ void glrenderer::initializegl(int w, int h) {
 	// Set our perspective
 	viewleft = -(w/2.0f);
 	viewright = w/2.0f;
-	viewtop = -h/2.0f;
-	viewbottom = h/2.0f;
-	
-	glOrtho(viewleft, viewright, viewbottom, viewtop, -1000.0f, 1000.0);
-// 	gluPerspective(50.0, (GLfloat)(((float)w) / ((float)h)), 0.1f, 100.0f);
+	viewtop = h/2.0f;
+	viewbottom = -h/2.0f;
 }
 
 /* hook for a renderer.surfaces change */
@@ -135,6 +134,13 @@ glrenderer::~glrenderer() {
 		surfacebyid.erase(surfacebyid.begin());
 		
 		delete img;
+	}
+	
+	while (!textbyid.empty()) {
+		gltext * t = (textbyid.begin()->second);
+		textqueue.erase(t);
+		textbyid.erase(textbyid.begin());
+		delete t;
 	}
 }
 
@@ -162,6 +168,40 @@ void glrenderer::setup(object::signature & sig) {
 	
 	if ((string)surfaces != "") {
 		loadsurfaces(surfaces, sig["imgpath"]);
+	}
+	
+	set<string> textset;
+	set<string>::iterator textdef;
+	split(textset, textlist, ' ');
+	for (textdef = textset.begin(); textdef != textset.end(); textdef++) {
+		string id = *textdef;
+		gltext * text = new gltext(this, id);
+		text->x = eval(sig[id + ".position.x"], 0.0f);
+		text->y = eval(sig[id + ".position.y"], 0.0f);
+		text->z = eval(sig[id + ".position.z"], 0.0f);
+		text->w = eval(sig[id + ".position.w"], read<int>("w"));
+		text->h = eval(sig[id + ".position.h"], read<int>("h"));
+		text->rotation = eval(sig[id + ".position.rotation"], 0.0f);
+		text->zoom = eval(sig[id + ".zoom"], 1.0f);
+		text->bind = eval(sig[id + ".bind"], true);
+		text->absolute = eval<bool>(sig[id + ".absolute"], true);
+		text->alpha = eval<float>(sig[id + ".alpha"], 1.0f);
+		text->render = eval<bool>(sig[id + ".render"], true);
+		text->text = sig[id + ".text"];
+		text->blended = eval(sig[id + ".blended"], false);
+		if (sig[id + ".font"] == "") {
+			text->font = "arial.ttf";
+		} else {
+			text->font = sig[id + ".font"];
+		}
+		text->fontsz = eval<int>(sig[id+".font.size"], 16);
+		text->r = eval(sig[id+"font.r"], 1.0f);
+		text->g = eval(sig[id+"font.g"], 1.0f);
+		text->b = eval(sig[id+"font.b"], 1.0f);
+		
+		textbyid[id] = text;
+		textqueue.insert(text);
+		
 	}
 	// initialize with signature;
 	// we do not need to rerun this because if the user loads a surface
@@ -203,6 +243,11 @@ void glrenderer::loadsurfaces(string surfacelist, string imgpath) {
 		glimage * img = prepare(id, tex);
 		renderqueue.insert(img);
 	}
+}
+
+void glrenderer::loadtexts(string textlist) {
+
+
 }
 
 
@@ -327,7 +372,7 @@ void glrenderer::populate() {
 		
 // 		printf("aaa %d %d %d %d\n", img->w, img->tex.realw, img->tex.w, img->tex.id);
 		glvertices[v++] = x;
-		glvertices[v++] = y;
+		glvertices[v++] = -y;
 		glvertices[v++] = z;
 		
 		/* clip/attach point */
@@ -337,7 +382,7 @@ void glrenderer::populate() {
 		
 		/* vertices */
 		glvertices[v++] = x + img->w;
-		glvertices[v++] = y;
+		glvertices[v++] = -y;
 		glvertices[v++] = z;
 		
 		/* clip/attach point */
@@ -346,7 +391,7 @@ void glrenderer::populate() {
 		
 		/* vertices */
 		glvertices[v++] = x + img->w;
-		glvertices[v++] = y + img->h;
+		glvertices[v++] = -y - img->h;
 		glvertices[v++] = z;
 		
 		/* clip/attach point */
@@ -355,7 +400,7 @@ void glrenderer::populate() {
 		
 		/* vertices */
 		glvertices[v++] = x;
-		glvertices[v++] = y + img->h;
+		glvertices[v++] = -y - img->h;
 		glvertices[v++] = z;
 		
 		/* clip/attach point */
@@ -369,43 +414,52 @@ void glrenderer::populate() {
 void glrenderer::render() {
 	populate();
 	
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	
-	glOrtho(viewleft, viewright, viewbottom, viewtop, -1000.0f, 1000.0);
-	
+	// fuck.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glOrtho(0, viewright*2, 0, viewtop*2, numeric_limits<float>::min(), numeric_limits<float>::max());
+	glTranslatef(0, viewtop*2, 0);
+	for (textrenderset::iterator i = textqueue.begin(); i != textqueue.end(); ++i) {
+		(*i)->rendertext();
+	}
+	
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glOrtho(viewleft, viewright, viewbottom, viewtop, numeric_limits<float>::min(), numeric_limits<float>::max());
+	
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	
 	glTexCoordPointer(2, GL_FLOAT, 0, gltextures);
 	glVertexPointer(3, GL_FLOAT, 0, glvertices);
-	
-	texturedef tex = (*renderqueue.begin())->tex;
-	int start = -4;
-	for (renderset::iterator i = renderqueue.begin(); i != renderqueue.end(); ++i) {
-		if (tex.id == (*i)->tex.id) { start += 4; continue; }
+	texturedef tex;
+	if (renderqueue.size() > 0) {
+		tex = (*renderqueue.begin())->tex;
+		int start = -4;
+		for (renderset::iterator i = renderqueue.begin(); i != renderqueue.end(); ++i) {
+			if (tex.id == (*i)->tex.id) { start += 4; continue; }
+			
+			/* new texture id */
+	// 		printf("casa do xapeu: %d\n", tex.id);
+			glBindTexture(GL_TEXTURE_2D, tex.id);
+			glDrawArrays(GL_QUADS, start, tex.count * 4);
+	// 		printf("%d\n", start);
+			start += 4;
 		
-		/* new texture id */
-// 		printf("casa do xapeu: %d\n", tex.id);
+			tex = (*i)->tex;
+		}
+		/* last texture */
 		glBindTexture(GL_TEXTURE_2D, tex.id);
 		glDrawArrays(GL_QUADS, start, tex.count * 4);
-// 		printf("%d\n", start);
-		start += 4;
-	
-		tex = (*i)->tex;
 	}
-	/* last texture */
-// 	printf("%d\n", start);
-// 	printf("casa do xapeu: %d\n", tex.id);
-	glBindTexture(GL_TEXTURE_2D, tex.id);
-	glDrawArrays(GL_QUADS, start, tex.count * 4);
-
-	/* house cleaning? */
 	glBindTexture(GL_TEXTURE_2D, 0);
-	
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	
+	/* house cleaning? */
+
 	
 	SDL_GL_SwapBuffers();
 }

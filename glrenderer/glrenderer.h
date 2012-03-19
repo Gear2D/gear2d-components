@@ -4,6 +4,8 @@
 #include "gear2d.h"
 #include "SDL.h"
 #include "glimage.h"
+#include "gltext.h"
+
 
 class glimage;
 using namespace std;
@@ -68,6 +70,8 @@ class glrenderer : public component::base {
 		/* loads a list of surfaces */
 		void loadsurfaces(string surfacelist, string imgpath = "");
 		
+		void loadtexts(string textlist);
+		
 		/* prepare an glimage based on a texture definition */
 		glimage * prepare(string id, texturedef & tex);
 		
@@ -92,7 +96,7 @@ class glrenderer : public component::base {
 		gear2d::link<string> textlist;
 		
 		map<string, glimage*> surfacebyid;
-// 		map<string, textdef*> textdefbyid;
+		map<string, gltext*> textbyid;
 		
 		
 	/* hooks */
@@ -122,10 +126,11 @@ class glrenderer : public component::base {
 		
 		static map<string, texturedef> rawbyfile;
 		
-		
 		typedef set<glimage *, glimagecmp> renderset;
 		static renderset renderqueue;
 		
+		typedef set<gltext *> textrenderset;
+		static textrenderset textqueue;
 		
 };
 
