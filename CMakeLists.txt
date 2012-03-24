@@ -84,7 +84,7 @@ target_link_libraries(rigidbody2d ${Gear2D_LIBRARY})
 target_link_libraries(singleselect ${Gear2D_LIBRARY})
 target_link_libraries(spritesheet ${Gear2D_LIBRARY})
 
-add_subdirectory(glrenderer)
+
 add_subdirectory(renderer)
 
 if (WIN32)
