@@ -172,7 +172,7 @@ class keyboard : public component::base {
 // 			SDL_PumpEvents(); // this is done by the engine now.
 			if (usedkeys.size() == 0) return;
 			
-			if (kbstate[SDLK_q]) exit(0);
+// 			if (kbstate[SDLK_q]) exit(0);
 			for (std::set<int>::iterator it = usedkeys.begin(); it != usedkeys.end(); it++) {
 				int key = *it;
 				int kstate = kbstate[key]; // pressed or not-pressed
