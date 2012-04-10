@@ -34,7 +34,7 @@ cpack_fix_slashes ()
 
 interactive=TRUE
 cpack_skip_license=FALSE
-cpack_include_subdir=""
+cpack_include_subdir=FALSE
 for a in "$@CPACK_AT_SIGN@"; do
   if echo $a | grep "^--prefix=" > /dev/null 2> /dev/null; then
     cpack_prefix_dir=`echo $a | sed "s/^--prefix=//"`
@@ -58,10 +58,10 @@ for a in "$@CPACK_AT_SIGN@"; do
   fi
 done
 
-if [ "x${cpack_include_subdir}x" != "xx" -o "x${cpack_skip_license}x" = "xTRUEx" ]
-then
-  interactive=FALSE
-fi
+# if [ "x${cpack_include_subdir}x" != "xx" -o "x${cpack_skip_license}x" = "xTRUEx" ]
+# then
+#   interactive=FALSE
+# fi
 
 cpack_version
 echo "This is a self-extracting archive."
@@ -95,19 +95,37 @@ ____cpack__here_doc____
     esac
   fi
 
-  if [ "x${cpack_include_subdir}x" = "xx" ]
+  if [ "x${cpack_prefix_dir}x" = "xx" ]
   then
-    echo "By default the @CPACK_PACKAGE_NAME@ will be installed in:"
-    echo "  \"${toplevel}/@CPACK_PACKAGE_FILE_NAME@\""
-    echo "Do you want to include the subdirectory @CPACK_PACKAGE_FILE_NAME@?"
-    echo "Saying no will install in: \"${toplevel}\" [Yn]: "
-    read line leftover
-    cpack_include_subdir=TRUE
-    case ${line} in
-      n* | N*)
-        cpack_include_subdir=FALSE
-    esac
+    echo "@CPACK_PACKAGE_NAME@ must be installed in the same place"
+    echo "or prefix that Gear2D was previously installed. Please, use the"
+    echo "--prefix option to specify the correct top-level path where it was installed."
+    exit 1
+  elif [[ -x ${cpack_prefix_dir}/bin/gear2d || -x ${cpack_prefix_dir}/gear2d ]]
+  then
+    toplevel=${cpack_prefix_dir}
+  else
+	echo "The prefix you provided does not seem to contain the gear2d"
+	echo "executable. Install it in ${cpack_prefix_dir} anyway? [Yn]"
+	read line leftover
+	case ${line} in
+	  n* | N*)
+		exit 1;;
+	esac
   fi
+  
+#   if 
+#     
+#     echo "  \"${toplevel}/@CPACK_PACKAGE_FILE_NAME@\""
+#     echo "Do you want to include the subdirectory @CPACK_PACKAGE_FILE_NAME@?"
+#     echo "Saying no will install in: \"${toplevel}\" [Yn]: "
+#     read line leftover
+#     cpack_include_subdir=TRUE
+#     case ${line} in
+#       n* | N*)
+#         cpack_include_subdir=FALSE
+#     esac
+#   fi
 fi
 
 if [ "x${cpack_include_subdir}x" = "xTRUEx" ]

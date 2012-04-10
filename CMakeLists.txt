@@ -1,7 +1,7 @@
 project(gear2d)
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/" "${CMAKE_SOURCE_DIR}")
 
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
