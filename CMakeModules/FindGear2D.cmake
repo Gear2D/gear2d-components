@@ -7,20 +7,16 @@
 # Gear2D_INCLUDE_DIR, where to find gear2d.h
 # Gear2D_LINK_DIR, where to find gear2d.so/gear2d.dll
 
-if(Gear2D_FOUND)
-	return()
-endif(Gear2D_FOUND)
-
 if (WIN32)
 	find_path(Gear2D_INCLUDE_DIR gear2d.h
 		HINTS
 		$ENV{GEAR2DDIR}
 		PATHS
-		"$ENV{PROGRAMFILES}\\Gear2D\\include"
-		"$ENV{PROGRAMFILES(X86)}\\Gear2D\\include"
+		"C:\\$ENV{PROGRAMFILES}\\Gear2D\\include"
+		"C:\\$ENV{PROGRAMFILES(X86)}\\Gear2D\\include"
 		"C:\\Gear2D\\include"
-		"$ENV{PROGRAMFILES}\\Gear2D\\include\\gear2d"
-		"$ENV{PROGRAMFILES(X86)}\\Gear2D\\include\\gear2d"
+		"C:\\$ENV{PROGRAMFILES}\\Gear2D\\include\\gear2d"
+		"C:\\$ENV{PROGRAMFILES(X86)}\\Gear2D\\include\\gear2d"
 		"C:\\Gear2D\\include\\gear2d"
 	)
 	
@@ -69,6 +65,7 @@ endif(WIN32)
 
 IF(Gear2D_INCLUDE_DIR AND Gear2D_LIBRARY)
 	SET(Gear2D_FOUND TRUE)
+	SET(Gear2D_COMPONENT_PREFIX ${Gear2D_LIBRARY}/../lib/gear2d/component)
 ENDIF(Gear2D_INCLUDE_DIR AND Gear2D_LIBRARY)
 
 IF(Gear2D_FOUND)
