@@ -494,10 +494,13 @@ class renderer : public component::base {
 				if (s->dirty) {
 					if (s->rotozoomed != NULL) SDL_FreeSurface(s->rotozoomed);
 					s->rotozoomed = rotozoomSurface(s->raw, s->rotation, s->zoom, 1);
-					dstrect.x = (s->w/2 - s->rotozoomed->w/2) - s->w/2 + dstrect.x;
-					dstrect.y = (s->h/2 - s->rotozoomed->h/2) - s->h/2 + dstrect.y;
-					srcrect.w += (s->rotozoomed->w - srcrect.w);
-					srcrect.h += (s->rotozoomed->h - srcrect.h);
+					dstrect.x = (s->w/2 - s->rotozoomed->w/2) + dstrect.x;
+					dstrect.y = (s->h/2 - s->rotozoomed->h/2) + dstrect.y;
+					s->x = dstrect.x;
+					s->y = dstrect.y;
+					srcrect.w = s->rotozoomed->w;
+					srcrect.h = s->rotozoomed->h;
+					s->clip = srcrect;
 					target = s->rotozoomed;
 					s->dirty = false;
 				}
