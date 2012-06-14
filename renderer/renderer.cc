@@ -264,6 +264,8 @@ class renderer : public component::base {
 				if (t == 0 || s == 0) return;
 				SDL_FreeSurface(s->raw);
 				s->raw = textdefbyid[textid]->render();
+				s->w = s->raw->w;
+				s->h = s->raw->h;
 			}
 		}
 		
