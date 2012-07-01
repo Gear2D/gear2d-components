@@ -531,9 +531,10 @@ class renderer : public component::base {
       SDL_Delay(1);
     }
     static void initialize(int w, int h) {
+      logverb;
       if (initialized == true) return;
       if (!SDL_WasInit(SDL_INIT_VIDEO)) {
-        cout << "Video wasn't initialized...." << endl;
+        trace("Initializing screen", log::info);
         if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) {
           throw evil(string("(Rendering component) Failed initializing SDL: ") + SDL_GetError());
         }
@@ -541,12 +542,14 @@ class renderer : public component::base {
       
       if (screen == 0) screen = SDL_SetVideoMode(w, h, 32, SDL_DOUBLEBUF);
       if (screen == 0) {
-        throw evil(string("(Rendering component) Failed initializing video: ") + SDL_GetError());
+        trace("Failure to initialize video", "[", SDL_GetError(), "]", log::error);
+        throw evil(string("(Rendering component) Failed initializing video"));
       }
       
       if (!TTF_WasInit()) {
         if (TTF_Init() != 0) {
-          throw evil(string("(Rendering component) Failed initializing font renderer: ") + TTF_GetError());
+          trace("Failure to initialize font rendering", "[", TTF_GetError(), "]", log::error);
+          throw evil(string("(Rendering component) Failed initializing font renderer: "));
         }
       }
       initialized = true;
