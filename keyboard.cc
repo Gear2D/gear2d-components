@@ -100,20 +100,20 @@ class keyboard : public component::base {
     }
     virtual component::type type() { return component::type("keyboard"); }
     virtual component::family family() { return component::family("keyboard"); }
-    virtual void handle(parameterbase::id pid, component::base * lastwrite, object::id owner) {
+    virtual void handleinterest(parameterbase::id pid, component::base * lastwrite, object::id owner) {
+      loginfo;
       if (pid == "keyboard.interested") {
         interest(read<string>("keyboard.interested"));
-        cout << "keyboard.interested " << read<string>("keyboard.interested") << endl;
+        trace("keyboard.interested ", read<string>("keyboard.interested"));
       }
     }
     
     virtual void setup(object::signature & sig) {
-      cout << "keyboard hello" << endl;
       if (!initialized) initialize();
       // check the interested keys
       string interested = sig["keyboard.interested"];
       write("keyboard.interested", std::string(""));
-      hook("keyboard.interested");
+      hook("keyboard.interested", (component::call)&keyboard::handleinterest);
       write<string>("keyboard.interested", sig["keyboard.interested"]);
       write<std::wstring>("keyboard.text", std::wstring());
       updaters++;
@@ -142,13 +142,14 @@ class keyboard : public component::base {
     }
     
     void interest(string interested) {
+      logverb;
       std::set<string> keys;
       split(keys, interested, ' ');
       for (std::set<string>::iterator it = keys.begin(); it != keys.end(); it++) {
         // build keyname
         string keyname = *it;
         if (keynames.find(keyname) == keynames.end()) {
-          cerr << "Key " << keyname << " does not exist. Dropping it." << endl;
+          trace("Key", keyname,"does not exist. Dropping it.", log::warning);
           continue;
         }
         int k = keynames[keyname];
@@ -169,10 +170,8 @@ class keyboard : public component::base {
     }
   private:
     static void doupdate() {
-//       SDL_PumpEvents(); // this is done by the engine now.
       if (usedkeys.size() == 0) return;
       
-//       if (kbstate[SDLK_q]) exit(0);
       for (std::set<int>::iterator it = usedkeys.begin(); it != usedkeys.end(); it++) {
         int key = *it;
         int kstate = kbstate[key]; // pressed or not-pressed
@@ -216,6 +215,8 @@ class keyboard : public component::base {
     static void initialize() {
       if (!SDL_WasInit(SDL_INIT_EVENTTHREAD | SDL_INIT_VIDEO)) {
         if (SDL_InitSubSystem(SDL_INIT_EVENTTHREAD | SDL_INIT_VIDEO) != 0) {
+          logerr;
+          trace("Event thread initialization failed!", SDL_GetError());
           throw (evil(string("(Keyboard Component) Event threat init fail! ") + SDL_GetError()));
         }
         
