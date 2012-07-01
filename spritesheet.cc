@@ -114,6 +114,7 @@ class spritesheet : public component::base {
     }
     
     virtual void setup(object::signature & sig) {
+      logverb;
       string animline = sig["animations"];
       set<string> animations;
       if (!animline.empty()) {
@@ -122,7 +123,7 @@ class spritesheet : public component::base {
         for (set<string>::iterator i = animations.begin(); i != animations.end(); i++) {
           id = *i;
           if (sig["renderer.surfaces"].find(id) == string::npos) {
-            std::cerr << "animation " << id << " won't load because it isn't on the surface list. " << endl;
+            trace("Unable to load animation ", id, "because its not on the surface list", log::warning);         
             continue;
           }
           animation * a = loadanim(id);
