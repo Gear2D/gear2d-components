@@ -20,46 +20,46 @@ using namespace gear2d;
 #include <math.h>
 
 class moveto : public component::base {
-	private:
-		const float * x;
-		const float * y;
-		const float * z;
-	public:
-		virtual component::family family() { return "controller"; }
-		virtual component::type type() { return "moveto"; }
-		virtual std::string depends() { return "spatial/space2d kinematics/kinematic2d"; }
-		virtual void setup(object::signature & sig) {
-			init("controller.target.x", sig["controller.target.x"], read<float>("x"));
-			init("controller.target.y", sig["controller.target.y"], read<float>("y"));
-			init("controller.target.z", sig["controller.target.z"], read<float>("z"));
-			init("controller.smooth", sig["controller.smooth"], true);
-			write("controller.reached", false);
-			x = &raw<float>("x");
-			y = &raw<float>("y");
-			z = &raw<float>("z");
-		}
-		
-		virtual void update(float dt) {
-			const float & tx = raw<float>("controller.target.x");
-			const float & ty = raw<float>("controller.target.y");
-			const float & tz = raw<float>("controller.target.z");
-			if (
-				(fabs(*x - tx) < 0.1) &&
-				(fabs(*y - ty) < 0.1) &&
-				(fabs(*z - tz) < 0.1)
-				)
-			{
-				write("controller.reached", true);
-			}
-			
-			if (read<bool>("controller.smooth")) {
-				write("x.accel", (tx - *x));
-				write("y.accel", (ty - *y));
-				write("z.accel", (tz - *z));
-			}
-		}
+  private:
+    const float * x;
+    const float * y;
+    const float * z;
+  public:
+    virtual component::family family() { return "controller"; }
+    virtual component::type type() { return "moveto"; }
+    virtual std::string depends() { return "spatial/space2d kinematics/kinematic2d"; }
+    virtual void setup(object::signature & sig) {
+      init("controller.target.x", sig["controller.target.x"], read<float>("x"));
+      init("controller.target.y", sig["controller.target.y"], read<float>("y"));
+      init("controller.target.z", sig["controller.target.z"], read<float>("z"));
+      init("controller.smooth", sig["controller.smooth"], true);
+      write("controller.reached", false);
+      x = &raw<float>("x");
+      y = &raw<float>("y");
+      z = &raw<float>("z");
+    }
+    
+    virtual void update(float dt) {
+      const float & tx = raw<float>("controller.target.x");
+      const float & ty = raw<float>("controller.target.y");
+      const float & tz = raw<float>("controller.target.z");
+      if (
+        (fabs(*x - tx) < 0.1) &&
+        (fabs(*y - ty) < 0.1) &&
+        (fabs(*z - tz) < 0.1)
+        )
+      {
+        write("controller.reached", true);
+      }
+      
+      if (read<bool>("controller.smooth")) {
+        write("x.accel", (tx - *x));
+        write("y.accel", (ty - *y));
+        write("z.accel", (tz - *z));
+      }
+    }
 };
 
 extern "C" {
-	component::base * build() { return new moveto; }
+  component::base * build() { return new moveto; }
 }

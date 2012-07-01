@@ -42,57 +42,57 @@ using namespace gear2d;
 #include <limits>
 
 class kinetic2d
-		: public component::base {
-	public:
-		kinetic2d() {
-		};
-		
-		virtual ~kinetic2d() { }
-		virtual component::type type() { return "kinematic2d"; }
-		virtual component::family family() { return "kinematics"; }
-		virtual std::string depends() { return "spatial/space2d"; }
-		
-		virtual void setup(object::signature & sig) {
-			init<float>("x.speed", sig["x.speed"], 0);
-			init<float>("x.speed.max", sig["x.speed.max"], std::numeric_limits<float>::infinity());
-			init<float>("x.speed.min", sig["x.speed.min"], -read<float>("x.speed.max"));
-			init<float>("y.speed", sig["y.speed"], 0);
-			init<float>("y.speed.max", sig["y.speed.max"], std::numeric_limits<float>::infinity());
-			init<float>("y.speed.min", sig["y.speed.min"], -read<float>("y.speed.max"));
-			
-			init<float>("x.accel", sig["x.accel"], 0);
-			init<float>("x.accel.max", sig["x.accel.max"], std::numeric_limits<float>::infinity());
-			init<float>("x.accel.min", sig["x.accel.min"], -read<float>("x.accel.max"));
-			
-			init<float>("y.accel", sig["y.accel"], 0);
-			init<float>("y.accel.max", sig["y.accel.max"], std::numeric_limits<float>::infinity());
-			init<float>("y.accel.min", sig["y.accel.min"], -read<float>("y.accel.max"));			
-		}
-		virtual void update(timediff dt) {
-			float xaccel, yaccel, xspeed, yspeed;
-			read<float>("x.accel", xaccel); read<float>("y.accel", yaccel);
-			read<float>("x.speed", xspeed); read<float>("y.speed", yspeed);
-			clamp(xaccel, read<float>("x.accel.min"), read<float>("x.accel.max"));
-			clamp(yaccel, read<float>("y.accel.min"), read<float>("y.accel.max"));
-			write<float>("x.accel", xaccel);
-			write<float>("y.accel", yaccel);
-			xspeed += xaccel * dt;
-			yspeed += yaccel * dt;
-			clamp(xspeed, read<float>("x.speed.min"), read<float>("x.speed.max"));
-			clamp(yspeed, read<float>("y.speed.min"), read<float>("y.speed.max"));
-			write("x.speed", xspeed);
-			write("y.speed", yspeed);
-			add("x", xspeed * dt);
-			add("y", yspeed * dt);
-		}
+    : public component::base {
+  public:
+    kinetic2d() {
+    };
+    
+    virtual ~kinetic2d() { }
+    virtual component::type type() { return "kinematic2d"; }
+    virtual component::family family() { return "kinematics"; }
+    virtual std::string depends() { return "spatial/space2d"; }
+    
+    virtual void setup(object::signature & sig) {
+      init<float>("x.speed", sig["x.speed"], 0);
+      init<float>("x.speed.max", sig["x.speed.max"], std::numeric_limits<float>::infinity());
+      init<float>("x.speed.min", sig["x.speed.min"], -read<float>("x.speed.max"));
+      init<float>("y.speed", sig["y.speed"], 0);
+      init<float>("y.speed.max", sig["y.speed.max"], std::numeric_limits<float>::infinity());
+      init<float>("y.speed.min", sig["y.speed.min"], -read<float>("y.speed.max"));
+      
+      init<float>("x.accel", sig["x.accel"], 0);
+      init<float>("x.accel.max", sig["x.accel.max"], std::numeric_limits<float>::infinity());
+      init<float>("x.accel.min", sig["x.accel.min"], -read<float>("x.accel.max"));
+      
+      init<float>("y.accel", sig["y.accel"], 0);
+      init<float>("y.accel.max", sig["y.accel.max"], std::numeric_limits<float>::infinity());
+      init<float>("y.accel.min", sig["y.accel.min"], -read<float>("y.accel.max"));      
+    }
+    virtual void update(timediff dt) {
+      float xaccel, yaccel, xspeed, yspeed;
+      read<float>("x.accel", xaccel); read<float>("y.accel", yaccel);
+      read<float>("x.speed", xspeed); read<float>("y.speed", yspeed);
+      clamp(xaccel, read<float>("x.accel.min"), read<float>("x.accel.max"));
+      clamp(yaccel, read<float>("y.accel.min"), read<float>("y.accel.max"));
+      write<float>("x.accel", xaccel);
+      write<float>("y.accel", yaccel);
+      xspeed += xaccel * dt;
+      yspeed += yaccel * dt;
+      clamp(xspeed, read<float>("x.speed.min"), read<float>("x.speed.max"));
+      clamp(yspeed, read<float>("y.speed.min"), read<float>("y.speed.max"));
+      write("x.speed", xspeed);
+      write("y.speed", yspeed);
+      add("x", xspeed * dt);
+      add("y", yspeed * dt);
+    }
 };
 
 extern "C" {
-	int initialized = 0;
-	component::base * build() {
-		if (!initialized) {
-			initialized = 1;
-		}
-		return new kinetic2d;
-	}
+  int initialized = 0;
+  component::base * build() {
+    if (!initialized) {
+      initialized = 1;
+    }
+    return new kinetic2d;
+  }
 }
