@@ -95,7 +95,6 @@ class audiosource : public gear2d::component::base {
 		
 		virtual void handle(parameterbase::id pid, component::base * last, object::id owner) {
 			if (pid == "audiosource.music") {
-				cout << musictoplay << " beach  " << playingmusic << endl;
 				if (musictoplay != playingmusic) {
 					if (musicisplaying) playmusic(musictoplay, -1);
 				}
