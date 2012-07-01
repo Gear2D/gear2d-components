@@ -60,6 +60,7 @@ class singleselect: public component::base {
     virtual component::type type() { return "singleselect"; }
     
     virtual void handle(parameterbase::id pid, component::base * lastw, object::id owns) {
+      logverb;
       int p;
       if (pid == "menu.options") {
         loadoptions(raw<string>(pid));
@@ -67,7 +68,7 @@ class singleselect: public component::base {
       }
       else if (pid == "menu.focus") {
         string focusid = raw<string>("menu.focus");
-        cout << "the focus is changing to " << focusid << endl;
+        trace(owner->name(), "- Focus is changing to ", focusid);
         if (focusid == "") focusid = optionbyorder.begin()->second->id;
         option * opt = optionbyid[focusid];
         // do not touch it again...
@@ -127,11 +128,12 @@ class singleselect: public component::base {
             cout << "success! " << optionbyorder.size() << " ";
           }
         }
-        cout << "ordering changes: " << oid << " to " << opt->order << endl;
+        trace(owner->name(), "- Ordering changes: ", oid, " to ", opt->order);
         return;
       }
     }
     virtual void setup(object::signature & sig) {
+      loginfo;
       loadoptions(sig["menu.options"]);
       write<string>("menu.options", sig["menu.options"]);
       hook("menu.options");
@@ -140,7 +142,7 @@ class singleselect: public component::base {
         string id = i->first;
         write(id + ".order", eval(sig[id + ".order"], 0));
         write(id + ".focused", eval(sig[id + ".focus"], false));
-        cout << "option " << id << " was set up with " << opt->focused << " as focused " << opt->order << " as order " << endl;
+        trace(id, "set up with", opt->focused, "as focused and", opt->order, "as order");
       }
       string focus = sig["menu.focus"];
       write("menu.focus", string(""));
