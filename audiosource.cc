@@ -90,10 +90,10 @@ class audiosource : public gear2d::component::base {
     map<string, sound *> soundbyid;
     
   public:
-        virtual component::type type() { return "audiosource"; }
-        virtual component::family family() { return "audiosource"; }
+    virtual component::type type() { return "audiosource"; }
+    virtual component::family family() { return "audiosource"; }
     
-    virtual void handle(parameterbase::id pid, component::base * last, object::id owner) {
+    virtual void handlemusic(parameterbase::id pid, component::base * last, object::id owner) {
       if (pid == "audiosource.music") {
         if (musictoplay != playingmusic) {
           if (musicisplaying) playmusic(musictoplay, -1);
@@ -101,13 +101,15 @@ class audiosource : public gear2d::component::base {
         return;
       }
       
-      if (pid == "audiosource.sounds") {
-        loadsounds(read<string>("audiosource.sounds"));
-        return;
-      }
-      
       if (pid == "audiosource.music.playing") {
         if (musicisplaying == false) stopmusic();
+        return;
+      }
+    }
+    
+    virtual void handlesounds(parameterbase::id pid, component::base * last, object::id owner) {
+      if (pid == "audiosource.sounds") {
+        loadsounds(read<string>("audiosource.sounds"));
         return;
       }
       
@@ -127,14 +129,14 @@ class audiosource : public gear2d::component::base {
       bind("audiosource.music.playing", musicisplaying);
       
       
-      hook("audiosource.music");
-      hook("audiosource.music.playing");
+      hook("audiosource.music", (component::call)&audiosource::handlemusic);
+      hook("audiosource.music.playing", (component::call)&audiosource::handlemusic);
       write("audiosource.music", sig["audiosource.music"]);
       write("audiosource.music.playing", eval(sig["audiosource.music.playing"], true));
       
       
       write<string>("audiosource.sounds", sig["audiosource.sounds"]);
-      hook("audiosource.sounds");
+      hook("audiosource.sounds", (component::call)&audiosource::handlesounds);
       
       loadsounds(sig["audiosource.sounds"]);
       
@@ -145,26 +147,22 @@ class audiosource : public gear2d::component::base {
         write(id + ".playing", eval(sig[id + ".playing"], false));
       }
     }
-    virtual void update(float dt) {
-      
-    }
+    
+    virtual void update(float dt) { ; }
     
   private:
     static void initialize(string initialmusic, string soundpath, string musicpath, bool shouldplay) {
       if (initialized) return;
       if (!SDL_WasInit(SDL_INIT_AUDIO)) {
         if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
-          std::cerr << "(audiosource component): Error initializing audio subsystem: " << SDL_GetError() << std::endl;
+          logerr;
+          trace("Unable to initialize the audio subsystem", SDL_GetError(), log::error);
           return;
         }
         
-        /*if (Mix_Init(MIX_INIT_FLAC | MIX_INIT_MOD | MIX_INIT_MP3 | MIX_INIT_OGG) == 0) {
-          std::cerr << "(audiosource component): Unable to initialize any music format. You will not be able to play anything." << endl;
-          return;
-        }*/
-        
         if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) != 0) {
-          std::cerr << "(audiosource component): Unable to open the audio subsystem" << endl;
+          logerr;
+          trace("Unable to open the audio subsystem", SDL_GetError(), log::error);
           return;
         }
       }
@@ -200,7 +198,8 @@ class audiosource : public gear2d::component::base {
       if (chunk != 0) return chunk;
       chunk = Mix_LoadWAV(soundfn.c_str());
       if (chunk == 0) {
-        std::cerr << "(audiosource component): Unable to load " << soundfn << ": " << SDL_GetError() << endl;
+        logerr;
+        trace("Unable to load sound", soundfn, "[", SDL_GetError, "]", log::error);
         return 0;
       }
       
@@ -212,7 +211,8 @@ class audiosource : public gear2d::component::base {
       if (m == 0) {
         m = Mix_LoadMUS(musicfn.c_str());
         if (m == 0) {
-          std::cerr << "(audiosource component): Unable to load music " << musicfn << ": " << SDL_GetError() << std::endl;
+          logerr;
+          trace("Unable to load music", musicfn, "[", SDL_GetError(), "]", log::error);
           return 0;
         }
       }
@@ -232,7 +232,6 @@ class audiosource : public gear2d::component::base {
       Mix_HaltMusic();
       musicisplaying = false;
     }
-    
 };
 
 bool audiosource::initialized = false;
