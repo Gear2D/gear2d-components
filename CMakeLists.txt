@@ -86,6 +86,7 @@ target_link_libraries(spritesheet ${Gear2D_LIBRARY})
 
 
 add_subdirectory(renderer)
+add_subdirectory(doc)
 
 if (WIN32)
 	add_subdirectory(thirdparty/win32)
