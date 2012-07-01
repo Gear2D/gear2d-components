@@ -68,7 +68,7 @@ class singleselect: public component::base {
       }
       else if (pid == "menu.focus") {
         string focusid = raw<string>("menu.focus");
-        trace(owner->name(), "- Focus is changing to ", focusid);
+        trace(owner->name(), "- Focus is changing to ", focusid, log::info);
         if (focusid == "") focusid = optionbyorder.begin()->second->id;
         option * opt = optionbyid[focusid];
         // do not touch it again...
@@ -125,10 +125,9 @@ class singleselect: public component::base {
           if (success.second) {
             // update iterator
             opt->itr = success.first;
-            cout << "success! " << optionbyorder.size() << " ";
           }
         }
-        trace(owner->name(), "- Ordering changes: ", oid, " to ", opt->order);
+        trace(owner->name(), "- Ordering changes:", oid, "to", opt->order, log::info);
         return;
       }
     }
