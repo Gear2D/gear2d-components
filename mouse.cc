@@ -33,10 +33,6 @@ class mouse : public component::base {
       write<int>("mouse.1", 0);
       write<int>("mouse.2", 0);
       write<int>("mouse.3", 0);
-      
-      
-      /* ----------------- */
-      
     }
     
     virtual void update(timediff dt) {
@@ -73,7 +69,9 @@ class mouse : public component::base {
       if (initialized) return;
       if (!SDL_WasInit(SDL_INIT_EVENTTHREAD)) {
         if (SDL_InitSubSystem(SDL_INIT_EVENTTHREAD | SDL_INIT_VIDEO) != 0) {
-          std::cerr << "(Mouse component) could not initialize event thread." << std::endl;
+          logerr;
+          trace("Event thread initialization failed!", SDL_GetError());
+          throw (evil(std::string("(Keyboard Component) Event threat init fail! ") + SDL_GetError()));
           return;
         }
       }
