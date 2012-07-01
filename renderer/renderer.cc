@@ -154,6 +154,9 @@ class renderer : public component::base {
         }
         
         SDL_Surface * render() {
+          logverb;
+          trace("Rendering text", id);
+          
           char sz[4];
           sprintf(sz, "%d", fontsz);
           TTF_Font *& f = renderer::fonts[font+'@'+sz];
@@ -161,7 +164,7 @@ class renderer : public component::base {
             f = TTF_OpenFont(font.c_str(), fontsz);
           }
           if (f == 0) {
-            std::cerr << "Font not found: " << font << std::endl;
+            trace("Cannot render text", id, "because I cannot find font", font, log::error);
             return 0;
           }
           
@@ -246,16 +249,21 @@ class renderer : public component::base {
     }
     
     virtual void rotationhandler(parameterbase::id pid, component::base * lastwrite, object::id owner) {
+      logverb;
       int p = pid.find(".position.rotation");
       string surfid = pid.substr(0, p);
+      trace("Rotating", surfid);
       surface * s = surfacebyid[surfid];
       if (s == 0) return;
       if (s->rotation != s->oldrotation) { s->dirty = true; s->oldrotation = s->rotation; }
     }
     
     virtual void texthandler(parameterbase::id pid, component::base * lastwrite, object::id owner) {
+      logverb;
       int p = pid.find('.');
       string textid = pid.substr(0, p);
+      
+      trace("Text for", textid, "changed");
       
       // changing some text we own
       if (textdefbyid[textid] != 0) {
@@ -414,7 +422,7 @@ class renderer : public component::base {
         int p = surfacedef->find('=');
         string id = surfacedef->substr(0, p);
         string file = surfacedef->substr(p+1);
-        if (surfacebyid[id] != 0) continue;
+        if (surfacebyid.find(id) != surfacebyid.end()) continue;
         SDL_Surface * raw = getraw(imgpath + file);
         surface * s = prepare(id, raw);
       }
@@ -455,10 +463,21 @@ class renderer : public component::base {
     
   
     static SDL_Surface * getraw(string file, bool reload = false) {
+      logverb;
       SDL_Surface * tmp, *s;
-      if ((s = rawbyfile[file]) != 0 && reload == false) { return s; }
+      
+      /* return the same already-loaded surface */
+      std::map<std::string, SDL_Surface *>::iterator it;
+      if ((it = rawbyfile.find(file)) != rawbyfile.end()) {
+        s = it->second;
+        return s;
+      }
+      
       tmp = IMG_Load(file.c_str());
-      if (tmp == 0) return 0;
+      if (tmp == 0) {
+        trace("Error loading file", file, "[", SDL_GetError(), "]", log::error);
+        return 0;
+      }
       if (tmp->format->Amask != 0) {
         SDL_SetAlpha(tmp, SDL_RLEACCEL | SDL_SRCALPHA, 255);
         s = SDL_DisplayFormatAlpha(tmp);
