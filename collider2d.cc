@@ -105,9 +105,7 @@ class collider : public component::base {
     
   private:
     
-    // This set ups bullet world and context
     static void initialize() {
-      
     }
     
     static void calculate() {

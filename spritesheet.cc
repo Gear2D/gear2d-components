@@ -3,6 +3,7 @@
  * @author Leonardo Guilherme de Freitas
  * @b family animation
  * @b type spritesheet
+ * @addtogroup animation
  * 
  * Animation works only on the rendering surfaces.
  * Provites a sprite sheed animation.
