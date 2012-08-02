@@ -1,10 +1,10 @@
 /**
  * @file renderer.cc
- * @b family renderer
- * @b type renderer
  * @author Leonardo Guilherme de Freitas
- * @addtogroup components
- * @class renderer
+ * 
+ * @page renderer/renderer2d renderer/renderer2d
+ * - @b Family: renderer
+ * - @b Type: renderer2d
  * 
  * Renderer component that can work with images,
  * meshes&textures, primitives, etc...
@@ -154,7 +154,7 @@ class renderer : public component::base {
         }
         
         SDL_Surface * render() {
-          logverb;
+          modinfo("renderer2d/textdef");
           trace("Rendering text", id);
           
           char sz[4];
@@ -249,7 +249,7 @@ class renderer : public component::base {
     }
     
     virtual void rotationhandler(parameterbase::id pid, component::base * lastwrite, object::id owner) {
-      logverb;
+      modinfo(type());
       int p = pid.find(".position.rotation");
       string surfid = pid.substr(0, p);
       trace("Rotating", surfid);
@@ -259,7 +259,7 @@ class renderer : public component::base {
     }
     
     virtual void texthandler(parameterbase::id pid, component::base * lastwrite, object::id owner) {
-      logverb;
+      modinfo(type());
       int p = pid.find('.');
       string textid = pid.substr(0, p);
       
@@ -463,7 +463,7 @@ class renderer : public component::base {
     
   
     static SDL_Surface * getraw(string file, bool reload = false) {
-      logverb;
+      modinfo("renderer2d");
       SDL_Surface * tmp, *s;
       
       /* return the same already-loaded surface */
@@ -531,7 +531,7 @@ class renderer : public component::base {
       SDL_Delay(1);
     }
     static void initialize(int w, int h) {
-      logverb;
+      modinfo("renderer2d");
       if (initialized == true) return;
       if (!SDL_WasInit(SDL_INIT_VIDEO)) {
         trace("Initializing screen", log::info);

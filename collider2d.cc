@@ -3,7 +3,7 @@
  * @b family collider
  * @b type collider
  * @author Leonardo Guilherme de Freitas
- * @addtogroup collider
+ * @namespace collider
  * 
  * Calculates collision between all colliders, informing side.
  * <b>provides/acts upon</b>
@@ -142,6 +142,7 @@ class collider : public component::base {
             inter.w = min(faabb.x + faabb.w, saabb.x + saabb.w) - max(faabb.x, saabb.x);
             inter.h = min(faabb.y + faabb.h, saabb.y + saabb.h) - max(faabb.y, saabb.y);
             
+            
             int fc, sc;
             
             // when h bigger than w, side collision first
@@ -153,7 +154,6 @@ class collider : public component::base {
               if (inter.y == faabb.y) { fc = 1; sc = 3; }
               else { fc = 3; sc = 1; }
             }
-            
             
             first->write<float>("collider.collision.x", inter.x);
             first->write<float>("collider.collision.y", inter.y);

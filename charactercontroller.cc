@@ -3,7 +3,7 @@
  * @b family controller
  * @b type character
  * @author Leonardo Guilherme de Freitas
- * @addtogroup controller
+ * @namespace controller
  * 
  * Controls x and y triggered by up, down, left and right.
  * 

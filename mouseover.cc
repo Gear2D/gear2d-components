@@ -3,8 +3,10 @@ using namespace gear2d;
 
 /**
  * @file mouseover.cc
+ * @namespace mouseover
  * @b Parameters:
  * @li @c mouseover (bool) set to true when mouse is over the rectangle, false when not.
+ * 
  */
 class mouseover : public gear2d::component::base {
   public:

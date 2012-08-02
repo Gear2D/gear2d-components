@@ -3,7 +3,7 @@
  * @b family keyboard
  * @b type keyboard
  * @author Leonardo Guilherme de Freitas
- * @addtogroup keyboard
+ * @namespace keyboard
  * 
  * Default keyboard component. It provides the state of the key
  * as an integer with 4 possible values:
@@ -142,7 +142,7 @@ class keyboard : public component::base {
     }
     
     void interest(string interested) {
-      logverb;
+      modinfo(type());
       std::set<string> keys;
       split(keys, interested, ' ');
       for (std::set<string>::iterator it = keys.begin(); it != keys.end(); it++) {

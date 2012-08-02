@@ -1,9 +1,8 @@
 /**
  * @file rigidbody2d.cc
- * @addtogroup dynamics
  * @b family dynamics
  * @b type rigidbody2d
- * @addtogroup dynamics
+ * @namespace dynamics
  * @author Leonardo Guilherme de Freitas
  * 
  * This components reacts to collision making speed change

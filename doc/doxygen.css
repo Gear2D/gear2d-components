@@ -797,16 +797,21 @@ dl
         padding: 0 0 0 10px;
 }
 
-dl.note, dl.warning, dl.attention, dl.pre, dl.post, dl.invariant, dl.deprecated, dl.todo, dl.test, dl.bug
+dt.note, dl.note, dl.warning, dl.attention, dl.pre, dl.post, dl.invariant, dl.deprecated, dl.todo, dl.test, dl.bug
 {
         border-left:4px solid;
         padding: 0 0 0 6px;
 }
 
-dl.note
+dt.note, dl.note
 {
 		border-color: #6E17C6;
 /* 		background-color: #E3C2F5; */
+}
+
+dt.note
+{
+  background-color: #E3C2F5;
 }
 
 dl.warning, dl.attention

@@ -1,23 +1,55 @@
 /**
  * @file spritesheet.cc
  * @author Leonardo Guilherme de Freitas
- * @b family animation
- * @b type spritesheet
- * @addtogroup animation
+ * @page animation/spritesheet animation/spritesheet
  * 
- * Animation works only on the rendering surfaces.
- * Provites a sprite sheed animation.
+ * @section animation-spritesheet-selector Selector
+ * - @b Family: animation
+ * - @b Type: spritesheet
+ * - @b Full @b selector: animation/spritesheet
  * 
- * @b depends renderer
+ * @section Description
  * 
- * @b provides/require
- * @li @c animations List of graphic ids to be used as animation sprites
- * @li @c <id>.animation.frame.size Width of the sprite frame @b int
+ * The spritesheet kind of animation manpulates the clipping rectangle of a surface
+ * to create the illusion of movement. For it to work you need to first specify
+ * correctly the clipping rectangle in a @b renderer component (for instance,
+ * @ref renderer/renderer2d).
+ * 
+ * Currently it only supports moving horizontally (that is, changing the clipping
+ * position to the right or to the left, using <tt>&lt;surface-id&gt;.clip.x</tt>),
+ * but it behaves correctly if you changethe vertical position of the clipping
+ * rectangle <tt>(&lt;surface-id&gt;.clip.y)</tt>.
+ * 
+ * @section Dependencies
+ * 
+ * - A renderer component that handles clipping rectangles.
+ * 
+ @section Parameters
+ <dl>
+ <dt class="note">@c animations: </dt>
+  <dd>List of surface ids to be used as animation sprites. Those ids will be
+  enhanced with parameters that the spritesheet component is sensible to.
+      - @c type: List of strings of surface-ids separated by space
+      - @c default: empty
+  </dd>
+  <dt class="note"><tt>&lt;surface-id&gt;.animation.frame.size</tt></dt>
+  <dd>
+    Width of the frame.
+  </dd>
+  <dt class="note">&lt;surface-id&gt;.animation.frame</dt>
+  <dd>
+  </dd>
+  
+ </dl>
+ * @li @c <surface-id>.animation.frame.size Width of the sprite frame @b int
  * @li @c <id>.animation.frame Current animation frame @b int
  * @li @c <id>.animation.finished Listen to this if you want to know when the animation has finished @b bool
  * @li @c <id>.animation.wrap Shall the animation wrap? @b bool
  * @li @c <id>.animation.play Play or stop the current animation @b bool
  * @li @c <id>.animation.speed Speed of animation (seconds between frames) @b float
+ * 
+ * @see @ref renderer/renderer2d
+ * 
  */
 
 #include "gear2d.h"
@@ -115,7 +147,7 @@ class spritesheet : public component::base {
     }
     
     virtual void setup(object::signature & sig) {
-      logverb;
+      modinfo(type());
       string animline = sig["animations"];
       set<string> animations;
       if (!animline.empty()) {

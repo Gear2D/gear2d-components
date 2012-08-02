@@ -3,7 +3,7 @@
  * @author Leonardo Guilherme de Freitas
  * @b family menu
  * @b type singleselect
- * @addtogroup menu
+ * @namespace menu
  * 
  * Defines a single-option menu. A single option
  * menu lets you define ordered options with identifcators.
@@ -60,7 +60,7 @@ class singleselect: public component::base {
     virtual component::type type() { return "singleselect"; }
     
     virtual void handle(parameterbase::id pid, component::base * lastw, object::id owns) {
-      logverb;
+      modinfo(family());
       int p;
       if (pid == "menu.options") {
         loadoptions(raw<string>(pid));

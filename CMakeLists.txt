@@ -3,6 +3,11 @@ cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/" "${CMAKE_SOURCE_DIR}")
 
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+  add_definitions(-DLOGTRACE)
+endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
 find_package(SDL_mixer REQUIRED)

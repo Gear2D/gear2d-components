@@ -1,8 +1,8 @@
 /**
- * @file kinetic2d.cc
- * @addtogroup kinetics
- * @b family kinetics
- * @b type kinetic2d
+ * @file kinematic2d.cc
+ * @namespace kinematic
+ * @b family kinematic
+ * @b type kinematic2d
  * @author Leonardo Guilherme de Freitas
  * 
  * This components apply acceleration, speed, rotational speed and

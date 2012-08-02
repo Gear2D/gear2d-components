@@ -1,6 +1,6 @@
 /**
  * @file mouse.cc
- * @addtogroup mouse
+ * @namespace mouse
  * @brief Provides mouse input.
  * 
  * @b Parameters:

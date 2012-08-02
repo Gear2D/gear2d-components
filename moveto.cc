@@ -2,6 +2,7 @@
  * @file moveto.cc
  * @b family controller
  * @b type moveto
+ * @namespace controller
  * 
  * A move-to controller that you can specify a target
  * and the object will set it speed to reach that target,

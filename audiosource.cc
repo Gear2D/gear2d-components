@@ -3,7 +3,7 @@
  * @b family audiosource
  * @b type audiosource
  * @author Leonardo Guilherme de Freitas
- * @addtogroup audiosource
+ * @namespace audiosource
  * 
  * Provides sound and music play/stop 
  *

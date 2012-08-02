@@ -3,7 +3,7 @@
  * @b type space2d
  * @b family spatial
  * @author Leonardo Guilherme de Freitas
- * @page spatial
+ * @namespace spatial
  * Spatial component that handles and process positioning,
  * size and scale of objects
  * 
@@ -28,6 +28,8 @@ class spatial : public component::base {
     virtual component::type type() { return "space2d"; }
     virtual component::family family() { return "spatial"; }
     virtual void handle (parameterbase::id pid, base * lastwrite, object::id owner) {
+      modinfo("space2d");
+      trace(pid, "for", this->owner->name(), "has changed!");
       if (lastwrite == this) return;
       
       /* not an update on the center */
