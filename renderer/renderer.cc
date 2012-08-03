@@ -16,7 +16,7 @@
  * @li <tt>renderer.surfaces</tt>: list of surfaces to load and work with, in the form of id=file separated by spaces. Loaded at setup and whenever changed.  @b string
  *     @warning double warning on this one. If you want to load a new surface, change renderer.surfaces BEFORE setting its other attributes or the
  *    binding will fail so bad you won't be able to hide. Be prepared for evil if you do.
- * @li <tt>\<id\>.position.bind</tt>: Tells if the position of this image shall follow spatial info (x, y). @b bool. Defaults to 1 (true)
+ * @li <tt>\<id\>.bind</tt>: Tells if the position of this image shall follow spatial info (x, y). @b bool. Defaults to 1 (true)
  * @li <tt>\<id\>.position.absolute</tt>: Tells if camera should be taken in account when rendering this. @b bool. 1 (true)
  * @li <tt>\<id\>.position.{x|y|z}</tt>: Specifics about the position of the image. If position.bind is specified, it will become an offset. @b float
  * @li <tt>\<id\>.position.{w|h}</tt>: Width and height of the image. Note that this does not scale the image, see "scale" below. @b int

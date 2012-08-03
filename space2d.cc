@@ -29,8 +29,8 @@ class spatial : public component::base {
     virtual component::family family() { return "spatial"; }
     virtual void handle (parameterbase::id pid, base * lastwrite, object::id owner) {
       modinfo("space2d");
-      trace(pid, "for", this->owner->name(), "has changed!");
       if (lastwrite == this) return;
+      trace(pid, "for", this->owner->name(), "has changed!");
       
       /* not an update on the center */
       if (pid == "x" || pid == "w")
