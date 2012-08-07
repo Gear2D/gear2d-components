@@ -3,10 +3,15 @@ cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/" "${CMAKE_SOURCE_DIR}")
 
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+endif (NOT CMAKE_BUILD_TYPE)
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
   add_definitions(-DLOGTRACE)
-endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+
+message("Building gear2d-components as ${CMAKE_BUILD_TYPE}")
 
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
