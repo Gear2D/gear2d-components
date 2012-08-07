@@ -3,10 +3,10 @@
  * @author Leonardo Guilherme de Freitas
  * @page animation/spritesheet animation/spritesheet
  * 
- * @section animation-spritesheet-selector Selector
+ * @section animation-spritesheet-information General information
  * - @b Family: animation
  * - @b Type: spritesheet
- * - @b Full @b selector: animation/spritesheet
+ * - @b Full @b name: animation/spritesheet
  * 
  * @section Description
  * 
