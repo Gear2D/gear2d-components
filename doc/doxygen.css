@@ -797,21 +797,28 @@ dl
         padding: 0 0 0 10px;
 }
 
-dt.note, dl.note, dl.warning, dl.attention, dl.pre, dl.post, dl.invariant, dl.deprecated, dl.todo, dl.test, dl.bug
+dl.warning, dl.attention, dl.pre, dl.post, dl.invariant, dl.deprecated, dl.todo, dl.test, dl.bug
 {
         border-left:4px solid;
         padding: 0 0 0 6px;
 }
 
-dt.note, dl.note
+.note dt
 {
-		border-color: #6E17C6;
-/* 		background-color: #E3C2F5; */
+  border-left:4px solid;
+  padding: 0 0 0 6px;
+  border-color: #6E17C6;
+  background-color: #efefef;
 }
 
-dt.note
+.note dd
 {
-  background-color: #E3C2F5;
+  padding: 0 0 0 6px;
+  margin-left: 0;
+  margin-bottom: 10px;
+  background-color: #efefef;
+  border-color: #6E17C6;
+  border-left:4px solid;
 }
 
 dl.warning, dl.attention

@@ -22,21 +22,20 @@
  * 
  * @section Dependencies
  * 
- * - A renderer component that handles clipping rectangles.
+ * - A renderer component that handles clipping rectangles (@ref renderer/renderer2d
+ * will do).
  * 
  @section Parameters
- <dl>
- <dt class="note">@c animations: </dt>
-  <dd>List of surface ids to be used as animation sprites. Those ids will be
-  enhanced with parameters that the spritesheet component is sensible to.
-      - @c type: List of strings of surface-ids separated by space
-      - @c default: empty
+ <dl class="note">
+ <dt>@c animations: </dt>
+  <dd>List of surface ids to be used as animation sprites and controlled by
+  this component
   </dd>
-  <dt class="note"><tt>&lt;surface-id&gt;.animation.frame.size</tt></dt>
+  <dt><tt>&lt;surface-id&gt;.animation.frame.size</tt></dt>
   <dd>
     Width of the frame.
   </dd>
-  <dt class="note">&lt;surface-id&gt;.animation.frame</dt>
+  <dt>&lt;surface-id&gt;.animation.frame</dt>
   <dd>
   </dd>
   

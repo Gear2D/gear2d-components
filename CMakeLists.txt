@@ -1,7 +1,7 @@
 project(gear2d)
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMakeModules/" "${CMAKE_SOURCE_DIR}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "${CMAKE_SOURCE_DIR}")
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo")
@@ -11,7 +11,24 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWit
   add_definitions(-DLOGTRACE)
 endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
 
-message("Building gear2d-components as ${CMAKE_BUILD_TYPE}")
+
+
+include(GetGitRevisionDescription)
+
+git_describe(Gear2D_COMPONENT_VERSION --tags)
+
+if(Gear2D_COMPONENT_VERSION AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION.in")
+  configure_file("${CMAKE_CURRENT_SOURCE_DIR}/VERSION.in" "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" @ONLY)
+elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+  file(STRINGS VERSION Gear2D_COMPONENT_VERSION)
+else()
+  set(Gear2D_COMPONENT_VERSION "unknown")
+endif()
+
+
+add_definitions(-DGEAR2D_COMPONENT_VERSION="${Gear2D_COMPONENT_VERSION}")
+message(STATUS "Building Gear2D components version ${Gear2D_COMPONENT_VERSION} as ${CMAKE_BUILD_TYPE} mode.")
+      
 
 find_package(SDL REQUIRED)
 find_package(SDL_image REQUIRED)
@@ -32,8 +49,6 @@ add_library(singleselect MODULE singleselect.cc)
 add_library(spritesheet MODULE spritesheet.cc)
 
 set(COMPONENT_INSTALL_DIR lib/gear2d/component)
-
-
 
 include_directories(${Gear2D_INCLUDE_DIR} ${SDL_INCLUDE_DIR})
 link_directories(${Gear2D_LINK_DIR})
@@ -115,12 +130,12 @@ endif()
 set(CPACK_PACKAGE_VENDOR "Gear2D Labs")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "gear2d")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Gear2D - Component-based game engine")
-set(CPACK_PACKAGE_VERSION ${Gear2D_VERSION})
+set(CPACK_PACKAGE_VERSION "${Gear2D_COMPONENT_VERSION}")
 
 if(WIN32)
-	set(CPACK_SOURCE_IGNORE_FILES "\\\\.git.*;${CMAKE_BINARY_DIR}/.*;.*~;\\\\.kdev4/.*;.*\\\\.kdev4;.*\\\\.swp")
+	set(CPACK_SOURCE_IGNORE_FILES "VERSION.in;\\\\.git.*;${CMAKE_BINARY_DIR}/.*;.*~;\\\\.kdev4/.*;.*\\\\.kdev4;.*\\\\.swp")
 else()
-	set(CPACK_SOURCE_IGNORE_FILES "\\\\.git.*;${CMAKE_BINARY_DIR}/.*;.*~;\\\\.kdev4/.*;.*\\\\.kdev4;.*\\\\.swp;.*thirdparty/win32/.*")
+	set(CPACK_SOURCE_IGNORE_FILES "VERSION.in;\\\\.git.*;${CMAKE_BINARY_DIR}/.*;.*~;\\\\.kdev4/.*;.*\\\\.kdev4;.*\\\\.swp;.*thirdparty/win32/.*")
 endif(WIN32)
 
 set(PACK_PACKAGE_EXECUTABLES gear2d;Gear2D Game Engine)
