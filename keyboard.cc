@@ -219,7 +219,6 @@ class keyboard : public component::base {
           trace("Event thread initialization failed!", SDL_GetError());
           throw (evil(string("(Keyboard Component) Event threat init fail! ") + SDL_GetError()));
         }
-        
       }
       SDL_EnableUNICODE(SDL_TRUE);
       keystatus.resize(SDLK_LAST, pair<int, bool>(0, false));

@@ -493,6 +493,7 @@ class renderer : public component::base {
   private:
     static void render() {
       if (zordered.size() == 0) return;
+      modinfo("renderer");
       SDL_Rect dstrect;
       SDL_Rect srcrect;
       SDL_Surface * target;
@@ -517,14 +518,15 @@ class renderer : public component::base {
           s->rotozoomed = rotozoomSurface(s->raw, s->rotation, s->zoom, 1);
           dstrect.x = (s->w/2 - s->rotozoomed->w/2) + dstrect.x;
           dstrect.y = (s->h/2 - s->rotozoomed->h/2) + dstrect.y;
-          s->x = dstrect.x;
-          s->y = dstrect.y;
+          s->x = dstrect.x - (s->bind ? s->parent->raw<float>("x") : 0);
+          s->y = dstrect.y - (s->bind ? s->parent->raw<float>("y") : 0);
           srcrect.w = s->rotozoomed->w;
           srcrect.h = s->rotozoomed->h;
           s->clip = srcrect;
           target = s->rotozoomed;
           s->dirty = false;
         }
+        trace("Rendering", s->id, "at", dstrect.x, dstrect.y);
         SDL_BlitSurface(target, &srcrect, screen, &dstrect);
       }
       SDL_Flip(screen);

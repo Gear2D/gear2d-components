@@ -61,10 +61,10 @@ class collider : public component::base {
       read("x", x); read("y", y), read("w", w), read("h", h);
       hook("w"); hook("h");
 
-      aabb.x = eval(sig["collider.aabb.x"], 0);
+      aabb.x = eval<float>(sig["collider.aabb.x"], 0.0f);
       bind("collider.aabb.x", aabb.x);
       
-      aabb.y = eval(sig["collider.aabb.y"], 0);
+      aabb.y = eval<float>(sig["collider.aabb.y"], 0.0f);
       bind("collider.aabb.y", aabb.y);
       
       aabb.w = eval(sig["collider.aabb.w"], w);
