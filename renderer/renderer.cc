@@ -112,10 +112,16 @@ struct surface {
     , oldz(z)
     , alpha(1.0f)
     , bind(true)
+	, render(true)
     , absolute(false)
     , raw(raw)
     , rotozoomed(NULL)
     , dirty(false) { 
+		clip.x = clip.y = clip.w = clip.h = 0;
+		if (raw) {
+			clip.w = raw->w;
+			clip.h = raw->h;
+		}
     }
     
     virtual ~surface() { }
@@ -493,7 +499,7 @@ class renderer : public component::base {
   private:
     static void render() {
       if (zordered.size() == 0) return;
-      modinfo("renderer");
+//       modinfo("renderer");
       SDL_Rect dstrect;
       SDL_Rect srcrect;
       SDL_Surface * target;
@@ -526,7 +532,7 @@ class renderer : public component::base {
           target = s->rotozoomed;
           s->dirty = false;
         }
-        trace("Rendering", s->id, "at", dstrect.x, dstrect.y);
+//         trace("Rendering", s->id, "at", dstrect.x, dstrect.y);
         SDL_BlitSurface(target, &srcrect, screen, &dstrect);
       }
       SDL_Flip(screen);
