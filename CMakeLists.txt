@@ -108,10 +108,7 @@ target_link_libraries(collider2d ${Gear2D_LIBRARY})
 target_link_libraries(rigidbody2d ${Gear2D_LIBRARY})
 target_link_libraries(singleselect ${Gear2D_LIBRARY})
 target_link_libraries(spritesheet ${Gear2D_LIBRARY})
-
-
 add_subdirectory(renderer)
-add_subdirectory(doc)
 
 if (WIN32)
 	get_filename_component(SDL_MIXER_LIBRARY_DIR ${SDL_MIXER_LIBRARY} PATH)
@@ -129,7 +126,7 @@ if (WIN32)
 		DESTINATION bin
 	)
 endif (WIN32)
-
+add_subdirectory(doc)
 if (WIN32)
 	set(CPACK_SOURCE_GENERATOR ZIP)
 	set(CPACK_GENERATOR NSIS;ZIP)
