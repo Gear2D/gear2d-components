@@ -9,4 +9,4 @@ install(TARGETS renderer
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
 )
 
-target_link_libraries(renderer SDL SDL_image SDL_ttf ${Gear2D_LIBRARY})
+target_link_libraries(renderer ${SDL_LIBRARY} ${SDL_IMAGE_LIBRARY} ${SDL_TTF_LIBRARY} ${Gear2D_LIBRARY})
