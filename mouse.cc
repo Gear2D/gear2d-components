@@ -95,6 +95,4 @@ int mouse::bt2 = 0;
 int mouse::bt3 = 0;
 bool mouse::initialized = false;
 
-extern "C" {
-  component::base * build() { return new mouse(); }
-}
+g2dcomponent(mouse);

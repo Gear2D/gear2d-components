@@ -151,7 +151,5 @@ float bounce::dragx = 0.0f;
 float bounce::dragy = 0.0f;
 bool bounce::initialized = false;
 
-extern "C" {
-  component::base * build() { return new bounce; }
-}
+g2dcomponent(bounce);
 

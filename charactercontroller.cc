@@ -122,8 +122,4 @@ class charactercontroller : public component::base {
     }
 };
 
-extern "C" {
-  component::base * build() {
-    return new charactercontroller();
-  }
-}
+g2dcomponent(charactercontroller);

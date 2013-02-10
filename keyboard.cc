@@ -243,8 +243,4 @@ vector< pair<int, bool> > keyboard::keystatus;
 map<string, int> keyboard::keynames;
 set<keyboard *> keyboard::kbcomponents;
 
-extern "C" {
-  component::base * build() {
-    return new keyboard;
-  }
-}
+g2dcomponent(keyboard);

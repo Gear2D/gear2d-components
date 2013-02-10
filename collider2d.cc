@@ -199,6 +199,4 @@ class collider : public component::base {
 int collider::voteforupdate = 0;
 std::set<collider*> collider::colliders;
 
-extern "C" {
-  component::base * build() { return new collider; }
-}
+g2dcomponent(collider);

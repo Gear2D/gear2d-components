@@ -37,8 +37,4 @@ class mouseover : public gear2d::component::base {
     }
 };
 
-extern "C" {
-  gear2d::component::base * build() {
-    return new mouseover;
-  }
-}
+g2dcomponent(mouseover);

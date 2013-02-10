@@ -103,12 +103,4 @@ class spatial : public component::base {
     }
 };
 
-extern "C" {
-  int initialized = 0;
-  component::base * build() {
-    if (!initialized) {
-      initialized = 1;
-    }
-    return new spatial;
-  }
-}
+g2dcomponent(spatial);

@@ -572,8 +572,4 @@ int renderer::rendervotes = 0;
 list<renderer*> renderer::renderers;
 map<string, TTF_Font *> renderer::fonts;
 
-extern "C" {
-  component::base * build() {
-    return new renderer;
-  }
-}
+g2dcomponent(renderer)

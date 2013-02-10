@@ -195,6 +195,5 @@ class singleselect: public component::base {
     }
 };
 
-extern "C" {
-  component::base * build() { return new singleselect; }
-}
+g2dcomponent(singleselect);
+

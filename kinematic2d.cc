@@ -87,12 +87,4 @@ class kinetic2d
     }
 };
 
-extern "C" {
-  int initialized = 0;
-  component::base * build() {
-    if (!initialized) {
-      initialized = 1;
-    }
-    return new kinetic2d;
-  }
-}
+g2dcomponent(kinetic2d)

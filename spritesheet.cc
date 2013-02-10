@@ -236,6 +236,4 @@ class spritesheet : public component::base {
     }
 };
 
-extern "C" {
-  component::base * build() { return new spritesheet; }
-}
+g2dcomponent(spritesheet);
