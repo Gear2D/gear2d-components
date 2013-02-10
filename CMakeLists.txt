@@ -100,7 +100,7 @@ install(TARGETS spritesheet
 target_link_libraries(mouseover ${Gear2D_LIBRARY})
 target_link_libraries(keyboard ${SDL_LIBRARY} ${Gear2D_LIBRARY})
 target_link_libraries(mouse ${SDL_LIBRARY} ${Gear2D_LIBRARY})
-target_link_libraries(audiosource ${SDL_LIBRARY} SDL_mixer ${Gear2D_LIBRARY})
+target_link_libraries(audiosource ${SDL_LIBRARY} ${SDL_MIXER_LIBRARY} ${Gear2D_LIBRARY})
 target_link_libraries(space2d ${Gear2D_LIBRARY})
 target_link_libraries(kinematic2d ${Gear2D_LIBRARY})
 target_link_libraries(charactercontroller ${Gear2D_LIBRARY})
