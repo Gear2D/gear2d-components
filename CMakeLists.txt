@@ -11,8 +11,6 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWit
   add_definitions(-DLOGTRACE)
 endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
 
-
-
 include(GetGitRevisionDescription)
 
 git_describe(Gear2D_COMPONENT_VERSION --tags)
@@ -116,7 +114,20 @@ add_subdirectory(renderer)
 add_subdirectory(doc)
 
 if (WIN32)
-	add_subdirectory(thirdparty/win32)
+	get_filename_component(SDL_MIXER_LIBRARY_DIR ${SDL_MIXER_LIBRARY} PATH)
+	set(SDL_MIXER_DLLS 
+		"${SDL_MIXER_LIBRARY_DIR}/SDL_mixer.dll"
+		"${SDL_MIXER_LIBRARY_DIR}/smpeg.dll"
+		"${SDL_MIXER_LIBRARY_DIR}/libvorbisfile-3.dll"
+		"${SDL_MIXER_LIBRARY_DIR}/libvorbis-0.dll"
+		"${SDL_MIXER_LIBRARY_DIR}/libogg-0.dll"
+		"${SDL_MIXER_LIBRARY_DIR}/libmikmod-2.dll"
+		"${SDL_MIXER_LIBRARY_DIR}/libFLAC-8.dll"
+	)
+	message(STATUS "Packaging SDL_mixer DLLs: ${SDL_MIXER_DLLS}")
+	install(FILES ${SDL_MIXER_DLLS}
+		DESTINATION bin
+	)
 endif (WIN32)
 
 if (WIN32)
