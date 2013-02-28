@@ -213,8 +213,15 @@ class keyboard : public component::base {
     }
 
     static void initialize() {
-      if (!SDL_WasInit(SDL_INIT_EVENTTHREAD | SDL_INIT_VIDEO)) {
-        if (SDL_InitSubSystem(SDL_INIT_EVENTTHREAD | SDL_INIT_VIDEO) != 0) {
+      int flags = SDL_INIT_VIDEO;
+
+	  // multithreaded events not supported on Windows.
+#if !defined _MSC_VER
+      flags |= SDL_INIT_EVENTTHREAD;
+#endif
+
+      if (!SDL_WasInit(flags)) {
+        if (SDL_InitSubSystem(flags) != 0) {
           logerr;
           trace("Event thread initialization failed!", SDL_GetError());
           throw (evil(string("(Keyboard Component) Event threat init fail! ") + SDL_GetError()));
