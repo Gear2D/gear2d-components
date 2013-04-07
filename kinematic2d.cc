@@ -70,20 +70,28 @@ class kinetic2d
     }
     virtual void update(timediff dt) {
       float xaccel, yaccel, xspeed, yspeed;
+      
+      /* read actual values */
       read<float>("x.accel", xaccel); read<float>("y.accel", yaccel);
       read<float>("x.speed", xspeed); read<float>("y.speed", yspeed);
       clamp(xaccel, read<float>("x.accel.min"), read<float>("x.accel.max"));
       clamp(yaccel, read<float>("y.accel.min"), read<float>("y.accel.max"));
+
+      /* update clamped acceleration */
       write<float>("x.accel", xaccel);
       write<float>("y.accel", yaccel);
+      
+      /* use rk4 to update position */
+      add("x", xspeed * dt + xaccel * dt * dt * .5);
+      add("y", yspeed * dt + yaccel * dt * dt * .5);
+      
+      /* update speed */
       xspeed += xaccel * dt;
       yspeed += yaccel * dt;
       clamp(xspeed, read<float>("x.speed.min"), read<float>("x.speed.max"));
       clamp(yspeed, read<float>("y.speed.min"), read<float>("y.speed.max"));
       write("x.speed", xspeed);
       write("y.speed", yspeed);
-      add("x", xspeed * dt);
-      add("y", yspeed * dt);
     }
 };
 
