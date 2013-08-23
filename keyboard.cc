@@ -56,24 +56,26 @@ using namespace std;
 
 class keyboard : public component::base {
   private:
-    enum {
+    enum keystate {
       UNPRESSED,
       CLICKED,
       PRESSED,
       RELEASED
     };
+
+	typedef struct {
+		int      state;
+		bool     changed;
+	} keystatus;
   private:
     // array with keystates
-    static Uint8 * kbstate;
+    static const Uint8 * kbstate;
     
-    // map of name->keyid
-    static map<string, int> keynames;
-    
-    // all status for each key
-    static vector< pair<int, bool> > keystatus;
+    // A map between a SDL_Keycode and keystatus
+    static map<SDL_Keycode, keystatus> keys;
     
     // set of all keys we have to check
-    static std::set<int> usedkeys;
+    static std::set<SDL_Keycode> usedkeys;
     
     // all kb components
     static set<keyboard *> kbcomponents;
@@ -133,77 +135,78 @@ class keyboard : public component::base {
     // their friends of kb changes.
     void kbupdate() {
       for (std::set<string>::iterator it = mykeys.begin(); it != mykeys.end(); it++) {
-        int key = keynames[*it];
+        SDL_Keycode key = SDL_GetKeyFromName(it->c_str());
         // values has changed, indeed. notify
-        if (keystatus[key].second == true) {
-          write(string("key.") + *it, keystatus[key].first);
+        if (keys[key].changed == true) {
+          write(string("key.") + *it, keys[key].state);
         }
       }
     }
     
     void interest(string interested) {
       modinfo(type());
-      std::set<string> keys;
-      split(keys, interested, ' ');
-      for (std::set<string>::iterator it = keys.begin(); it != keys.end(); it++) {
+      std::set<string> keylist;
+      split(keylist, interested, ' ');
+      for (std::set<string>::iterator it = keylist.begin(); it != keylist.end(); it++) {
         // build keyname
         string keyname = *it;
-        if (keynames.find(keyname) == keynames.end()) {
-          trace("Key", keyname,"does not exist. Dropping it.", log::warning);
+		SDL_Keycode keycode = SDL_GetKeyFromName(keyname.c_str());
+        if (keycode == SDLK_UNKNOWN) {
+          trace("Key", keyname, "does not have a name. Dropping it.", log::warning);
           continue;
         }
-        int k = keynames[keyname];
         
-        // tell ourselves we have this key
+        // keep our own list of keys
         mykeys.insert(keyname);
         
-        // add the key. prefix
+        // add the 'key.' prefix to keyname before binding it.
         keyname.insert(0, "key.");
 
-        // bitch.
-        bind<int>(keyname, keystatus[k].first);
+		// initialize the key
+		write<int>(keyname, (int)keystate::UNPRESSED);
         
-        // tell to use these keys
-        usedkeys.insert(k);
-        
+        // tell the component system to check for these keys
+        usedkeys.insert(keycode);
       }
     }
   private:
     static void doupdate() {
       if (usedkeys.size() == 0) return;
       
-      for (std::set<int>::iterator it = usedkeys.begin(); it != usedkeys.end(); it++) {
+      for (std::set<SDL_Keycode>::iterator it = usedkeys.begin(); it != usedkeys.end(); it++) {
         int key = *it;
-        int kstate = kbstate[key]; // pressed or not-pressed
-        int status = keystatus[key].first; // unpressed, clicked, pressed, released
+        int rawstate = kbstate[key]; // pressed or not-pressed
+        int status = keys[key].state; // unpressed, clicked, pressed, released
         
-        keystatus[key].second = false;
+		// start unchanged in this frame
+        keys[key].changed = false;
+
         // unpressed
-        if (kstate == 0) {
+        if (rawstate == 0) {
           // status is clicked or pressed, next: released
           if (status == CLICKED || status == PRESSED) {
-            keystatus[key].first = (int)RELEASED;
-            keystatus[key].second = true;
+            keys[key].state = (int)RELEASED;
+            keys[key].changed = true;
           }
       
           // status is relesed, next: unpressed
           else if (status == RELEASED) {
-            keystatus[key].first = (int)UNPRESSED;
-            keystatus[key].second = true;
+            keys[key].state = (int)UNPRESSED;
+            keys[key].changed = true;
           }
         }
         // pressed
-        else if (kstate == 1) {
+        else if (rawstate == 1) {
           // if its on a non-pressing state, set as clicked
           if (status == UNPRESSED || status == RELEASED) {
-            keystatus[key].first = (int)CLICKED;
-            keystatus[key].second = true;
+            keys[key].state = (int)CLICKED;
+            keys[key].changed = true;
           }
           
           // status is clicked, next: pressed
           else if (status == CLICKED) {
-            keystatus[key].first = (int)PRESSED;
-            keystatus[key].second = true;
+            keys[key].state = (int)PRESSED;
+            keys[key].changed = true;
           }
         }
       }
@@ -227,16 +230,9 @@ class keyboard : public component::base {
           throw (evil(string("(Keyboard Component) Event threat init fail! ") + SDL_GetError()));
         }
       }
-      SDL_EnableUNICODE(SDL_TRUE);
-      keystatus.resize(SDLK_LAST, pair<int, bool>(0, false));
-      kbstate = SDL_GetKeyState(NULL);
+      kbstate = SDL_GetKeyboardState(NULL);
       
       // initialize keynames...
-      char * name;
-      for (int i = 0; i < SDLK_LAST; i++) {
-        name = SDL_GetKeyName(SDLKey(i));
-        keynames[name] = i;
-      }
       initialized = true;
     }
 };
@@ -244,10 +240,9 @@ class keyboard : public component::base {
 int keyboard::updated = 0;
 int keyboard::updaters = 0;
 bool keyboard::initialized = false;
-Uint8 * keyboard::kbstate = 0;
+const Uint8 * keyboard::kbstate = 0;
 std::set<int> keyboard::usedkeys;
-vector< pair<int, bool> > keyboard::keystatus;
-map<string, int> keyboard::keynames;
+std::map<SDL_Keycode, keyboard::keystatus> keyboard::keys;
 set<keyboard *> keyboard::kbcomponents;
 
 g2dcomponent(keyboard);

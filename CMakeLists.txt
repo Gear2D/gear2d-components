@@ -28,12 +28,12 @@ add_definitions(-DGEAR2D_COMPONENT_VERSION="${Gear2D_COMPONENT_VERSION}")
 message(STATUS "Building Gear2D components version ${Gear2D_COMPONENT_VERSION} as ${CMAKE_BUILD_TYPE} mode.")
       
 # We do not want SDLMain
-set(SDL_BUILDING_LIBRARY 1)
+set(SDL2_BUILDING_LIBRARY 1)
 
-find_package(SDL REQUIRED)
-find_package(SDL_image REQUIRED)
-find_package(SDL_mixer REQUIRED)
-find_package(SDL_ttf REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
+find_package(SDL2_mixer REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 find_package(Gear2D REQUIRED)
 
 add_library(space2d MODULE space2d.cc)
@@ -50,7 +50,7 @@ add_library(spritesheet MODULE spritesheet.cc)
 
 set(COMPONENT_INSTALL_DIR lib/gear2d/component)
 
-include_directories(${Gear2D_INCLUDE_DIR} ${SDL_INCLUDE_DIR})
+include_directories(${Gear2D_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
 link_directories(${Gear2D_LINK_DIR})
 
 install(TARGETS space2d
@@ -98,9 +98,9 @@ install(TARGETS spritesheet
 )
 
 target_link_libraries(mouseover ${Gear2D_LIBRARY})
-target_link_libraries(keyboard ${SDL_LIBRARY} ${Gear2D_LIBRARY})
-target_link_libraries(mouse ${SDL_LIBRARY} ${Gear2D_LIBRARY})
-target_link_libraries(audiosource ${SDL_LIBRARY} ${SDL_MIXER_LIBRARY} ${Gear2D_LIBRARY})
+target_link_libraries(keyboard ${SDL2_LIBRARY} ${Gear2D_LIBRARY})
+target_link_libraries(mouse ${SDL2_LIBRARY} ${Gear2D_LIBRARY})
+target_link_libraries(audiosource ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} ${Gear2D_LIBRARY})
 target_link_libraries(space2d ${Gear2D_LIBRARY})
 target_link_libraries(kinematic2d ${Gear2D_LIBRARY})
 target_link_libraries(charactercontroller ${Gear2D_LIBRARY})
@@ -108,21 +108,22 @@ target_link_libraries(collider2d ${Gear2D_LIBRARY})
 target_link_libraries(rigidbody2d ${Gear2D_LIBRARY})
 target_link_libraries(singleselect ${Gear2D_LIBRARY})
 target_link_libraries(spritesheet ${Gear2D_LIBRARY})
-add_subdirectory(renderer)
+#add_subdirectory(renderer)
+add_subdirectory(renderer2)
 
 if (WIN32)
-	get_filename_component(SDL_MIXER_LIBRARY_DIR ${SDL_MIXER_LIBRARY} PATH)
-	set(SDL_MIXER_DLLS 
-		"${SDL_MIXER_LIBRARY_DIR}/SDL_mixer.dll"
-		"${SDL_MIXER_LIBRARY_DIR}/smpeg.dll"
-		"${SDL_MIXER_LIBRARY_DIR}/libvorbisfile-3.dll"
-		"${SDL_MIXER_LIBRARY_DIR}/libvorbis-0.dll"
-		"${SDL_MIXER_LIBRARY_DIR}/libogg-0.dll"
-		"${SDL_MIXER_LIBRARY_DIR}/libmikmod-2.dll"
-		"${SDL_MIXER_LIBRARY_DIR}/libFLAC-8.dll"
+	get_filename_component(SDL2_MIXER_LIBRARY_DIR ${SDL2_MIXER_LIBRARY} PATH)
+	set(SDL2_MIXER_DLLS 
+		"${SDL2_MIXER_LIBRARY_DIR}/SDL2_mixer.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/smpeg.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libvorbisfile-3.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libvorbis-0.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libogg-0.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libmikmod-2.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libFLAC-8.dll"
 	)
-	message(STATUS "Packaging SDL_mixer DLLs: ${SDL_MIXER_DLLS}")
-	install(FILES ${SDL_MIXER_DLLS}
+	message(STATUS "Packaging SDL2_mixer DLLs: ${SDL2_MIXER_DLLS}")
+	install(FILES ${SDL2_MIXER_DLLS}
 		DESTINATION bin
 	)
 endif (WIN32)

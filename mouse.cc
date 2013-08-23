@@ -44,9 +44,9 @@ class mouse : public component::base {
 
       if (read<int>("mouse.x") != x) write("mouse.x", x);
       if (read<int>("mouse.y") != y) write("mouse.y", y);
-      if (read<int>("mouse.1") != bt1) write<int>("mouse.1", bt1 != 0);
-      if (read<int>("mouse.2") != bt2) write<int>("mouse.2", bt2 != 0);
-      if (read<int>("mouse.3") != bt3) write<int>("mouse.3", bt3 != 0);
+	  if (read<int>("mouse.1") != bt1) { write<int>("mouse.1", bt1 != 0); write<int>("mouse.left", bt1 != 0); }
+	  if (read<int>("mouse.2") != bt2) { write<int>("mouse.2", bt2 != 0); write<int>("mouse.middle", bt2 != 0); }
+	  if (read<int>("mouse.3") != bt3) { write<int>("mouse.3", bt3 != 0); write<int>("mouse.right", bt3 != 0); }
     }
     
   private:
@@ -67,8 +67,8 @@ class mouse : public component::base {
   private:
     static void initialize() {
       if (initialized) return;
-      if (!SDL_WasInit(SDL_INIT_EVENTTHREAD)) {
-        if (SDL_InitSubSystem(SDL_INIT_EVENTTHREAD | SDL_INIT_VIDEO) != 0) {
+      if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+        if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) {
           logerr;
           trace("Event thread initialization failed!", SDL_GetError());
           throw (evil(std::string("(Keyboard Component) Event threat init fail! ") + SDL_GetError()));
@@ -80,9 +80,9 @@ class mouse : public component::base {
     static void globalupdate(timediff dt) {
       if (!initialized) return;
       Uint8 flags = SDL_GetMouseState(&x, &y);
-      bt1 = flags & SDL_BUTTON(1);
-      bt2 = flags & SDL_BUTTON(2);
-      bt3 = flags & SDL_BUTTON(3);
+      bt1 = flags & SDL_BUTTON(SDL_BUTTON_LEFT);
+      bt2 = flags & SDL_BUTTON(SDL_BUTTON_MIDDLE);
+      bt3 = flags & SDL_BUTTON(SDL_BUTTON_RIGHT);
     }
 };
 
