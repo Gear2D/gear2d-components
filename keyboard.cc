@@ -162,8 +162,8 @@ class keyboard : public component::base {
         // add the 'key.' prefix to keyname before binding it.
         keyname.insert(0, "key.");
 
-		// initialize the key
-		write<int>(keyname, (int)keystate::UNPRESSED);
+        // initialize the key
+        write<int>(keyname, (int)UNPRESSED);
         
         // tell the component system to check for these keys
         usedkeys.insert(keycode);
@@ -216,15 +216,8 @@ class keyboard : public component::base {
     }
 
     static void initialize() {
-      int flags = SDL_INIT_VIDEO;
-
-	  // multithreaded events not supported on Windows.
-#if !defined _MSC_VER
-      flags |= SDL_INIT_EVENTTHREAD;
-#endif
-
-      if (!SDL_WasInit(flags)) {
-        if (SDL_InitSubSystem(flags) != 0) {
+      if (!SDL_WasInit(SDL_INIT_VIDEO)) {
+        if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) {
           logerr;
           trace("Event thread initialization failed!", SDL_GetError());
           throw (evil(string("(Keyboard Component) Event threat init fail! ") + SDL_GetError()));
