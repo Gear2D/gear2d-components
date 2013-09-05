@@ -26,6 +26,8 @@ endif()
 
 add_definitions(-DGEAR2D_COMPONENT_VERSION="${Gear2D_COMPONENT_VERSION}")
 message(STATUS "Building Gear2D components version ${Gear2D_COMPONENT_VERSION} as ${CMAKE_BUILD_TYPE} mode.")
+
+add_definitions(-std=c++11)
       
 # We do not want SDLMain
 set(SDL2_BUILDING_LIBRARY 1)
