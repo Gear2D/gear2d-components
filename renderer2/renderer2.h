@@ -11,7 +11,7 @@ class renderer2 : public component::base {
 	  renderer2();
 	  virtual std::string family();
 	  virtual std::string type();
-	  virtual void setup(const map<std::string, std::string> & sig);
+	  virtual void setup(object::signature & sig);
 	  virtual void update(timediff dt);
 	  virtual ~renderer2();
 };
