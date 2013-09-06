@@ -5,15 +5,19 @@
 #include <string>
 
 using namespace gear2d;
+using std::string;
 
 class renderer2 : public component::base {
   public:
-	  renderer2();
-	  virtual std::string family();
-	  virtual std::string type();
-	  virtual void setup(object::signature & sig);
-	  virtual void update(timediff dt);
-	  virtual ~renderer2();
+    renderer2();
+    virtual std::string family();
+    virtual std::string type();
+    virtual void setup(object::signature & sig);
+    virtual void update(timediff dt);
+    virtual ~renderer2();
+    
+  private:
+    link<string> surfacelist;
 };
 
 #endif
