@@ -1,7 +1,10 @@
-#include "renderer2.h"
-#include "renderbase.h"
 #include "gear2d.h"
 #include "log.h"
+
+#include "renderer2.h"
+#include "renderbase.h"
+#include "texture.h"
+
 #include <string>
 
 using namespace gear2d;
@@ -29,8 +32,8 @@ class sigparser {
     }
 };
 
-renderer2::renderer2() { 
-  renderbase::
+renderer2::renderer2() {  log::info
+  renderbase::add(this);
 }
 
 renderer2::~renderer2() { 
@@ -40,28 +43,42 @@ std::string renderer2::family() { return "renderer"; }
 std::string renderer2::type() { return "renderer2"; }
 
 void renderer2::setup(object::signature & s) {
+  modinfo("renderer2");
   sigparser sig(s, this);
-  surfaces = sig.init("renderer.surfaces");
-  moderr("renderer2");
+  
+  if (!renderbase::initialized) {
+    int width; int height; bool fullscreen;
+    width = eval<int>(s["renderer.w"], 640);
+    height = eval<int>(s["renderer.h"], 480);
+    fullscreen = eval<int>(s["renderer.fullscreen"], 0) == 1;
+    renderbase::initialize(width, height, fullscreen);
+  }
+  
+  surfacelist = sig.init("renderer.surfaces");
   size_t pos = string::npos;
   
-  for (std::string surfdef : split(surfaces, ' ')) {
+  /* iterate through surface list */
+  for (std::string surfdef : split(surfacelist, ' ')) {
     size_t pos = surfdef.find('=');
     
     // skip erroneous lines
     if (pos == string::npos) {
-      trace("Skippint", surfdef, "as it is not a valid surface definition. Must be id=filename.");
+      trace("Skipping", surfdef, "as it is not a valid surface definition. Must be id=filename.",  log::error);
       continue;
     }
     
+    /* get id=name */
     string id = surfdef.substr(0,  pos);
     string filename = surfdef.substr(pos+1);
     
-    trace("Loading", filename, "as", id, log::info);
+    trace("Loading", filename, "as", id);
+    texture t = renderbase::load(filename);
+    
   }
 }
 
 void renderer2::update(timediff dt) {
+  renderbase::update((float)dt);
 }
 
 g2dcomponent(renderer2)
