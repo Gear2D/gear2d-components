@@ -32,11 +32,11 @@ class sigparser {
     }
 };
 
-renderer2::renderer2() {  log::info
-  renderbase::add(this);
+renderer2::renderer2() {
 }
 
 renderer2::~renderer2() { 
+
 }
 
 std::string renderer2::family() { return "renderer"; }
@@ -53,13 +53,15 @@ void renderer2::setup(object::signature & s) {
     fullscreen = eval<int>(s["renderer.fullscreen"], 0) == 1;
     renderbase::initialize(width, height, fullscreen);
   }
+
+  renderbase::add(this);
   
   surfacelist = sig.init("renderer.surfaces");
   size_t pos = string::npos;
   
   /* iterate through surface list */
   for (std::string surfdef : split(surfacelist, ' ')) {
-    size_t pos = surfdef.find('=');
+    pos = surfdef.find('=');
     
     // skip erroneous lines
     if (pos == string::npos) {
@@ -73,12 +75,11 @@ void renderer2::setup(object::signature & s) {
     
     trace("Loading", filename, "as", id);
     texture t = renderbase::load(filename);
-    
   }
 }
 
 void renderer2::update(timediff dt) {
-  renderbase::update((float)dt);
+  renderbase::update();
 }
 
 g2dcomponent(renderer2)

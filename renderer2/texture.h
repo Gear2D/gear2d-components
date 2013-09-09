@@ -12,8 +12,6 @@ class texture {
   public:
     float x, y, z;                                          // this texture position
     int w, h;                                               // texture size
-    
-  private:
     SDL_Texture * raw;                                      // raw texture to render
 };
 

@@ -9,18 +9,20 @@
 
 using namespace std;
 
-class render2;
+class renderer2;
 struct SDL_Texture;
 struct SDL_Renderer;
 struct SDL_Window;
+
+typedef pair<int, texture*> zorder;
 
 class renderbase {
   public:
     static void initialize(int width = 640, int height = 480, bool fullscreen = false);
     static texture load(const string & filename);
-    static void add(renderer2 * renderer);
+    static void add(texture & t);
     static void remove(renderer2 * renderer);
-    static int update(float dt); /* may render. returns number of surfaces rendered */
+    static int update(); /* may render. returns number of surfaces rendered */
     
   private:
     static int render();
@@ -40,6 +42,4 @@ class renderbase {
   public:
     static bool initialized;    
 };
-
-typedef pair<int, texture*> zorder;
 # endif

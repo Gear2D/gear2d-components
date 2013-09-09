@@ -9,7 +9,7 @@ texture::texture(SDL_Texture * raw)
   , y(0)
   , z(0) {
     if (raw == nullptr) return;
-    SDL_QueryTexture(raw, NULL, NULL, w, h);
+    SDL_QueryTexture(raw, NULL, NULL, &w, &h);
 }
 
 texture::texture(texture && other) 
