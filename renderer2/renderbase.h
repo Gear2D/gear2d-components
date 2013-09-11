@@ -19,7 +19,9 @@ typedef pair<int, texture*> zorder;
 class renderbase {
   public:
     static void initialize(int width = 640, int height = 480, bool fullscreen = false);
-    static texture load(const string & id, const string & filename);
+    static SDL_Texture * load(const string & filename);
+    static int querywidth(SDL_Texture * texture);
+    static int queryheight(SDL_Texture * texture);
     static void add(renderer2 * renderer);
     static void remove(renderer2 * renderer);
     static int update(); /* may render. returns number of surfaces rendered */
@@ -30,7 +32,6 @@ class renderbase {
   private:
     static set<renderer2*> renderers;
     static map<string, SDL_Texture *> rawtextures;
-    static set<zorder> renderorder;
     static SDL_Renderer * sdlrenderer;
     static SDL_Window * sdlwindow;                             // TODO: add support for multiple windows
     static int width, height;
@@ -41,5 +42,6 @@ class renderbase {
     
   public:
     static bool initialized;    
+    static set<zorder> renderorder;
 };
 #endif

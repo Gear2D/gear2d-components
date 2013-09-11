@@ -14,11 +14,12 @@ int renderbase::starttime = 0;
 std::set<zorder> renderbase::renderorder;
 SDL_Renderer * renderbase::sdlrenderer;
 SDL_Window * renderbase::sdlwindow;
+std::set<renderer2*> renderbase::renderers;
 
 
-void renderbase::add(texture & t) {
+void renderbase::add(renderer2 * renderer) {
   if (!initialized) initialize();
-  renderorder.emplace({t.z, &t});
+  renderers.insert(renderer);
 }
 
 void renderbase::remove(renderer2 * renderer) {
@@ -26,19 +27,31 @@ void renderbase::remove(renderer2 * renderer) {
   renderers.erase(renderer);
 }
 
-texture renderbase::load(const string & id, const string & filename) {
+int renderbase::queryheight(SDL_Texture *texture) {
+  int h;
+  SDL_QueryTexture(texture, NULL, NULL, NULL, &h);
+  return h;
+}
+
+int renderbase::querywidth(SDL_Texture *texture) {
+  int w;
+  SDL_QueryTexture(texture, NULL, NULL, &w, NULL);
+  return w;
+}
+
+SDL_Texture * renderbase::load(const string & filename) {
   moderr("render2");
   if (!initialized) initialize();
   SDL_Texture * tex = nullptr;
   auto i = rawtextures.find(filename);
   if (i == rawtextures.end()) {                             // texture not there.
-    tex = IMG_LoadTexture(sdlrenderer, filename);
+    tex = IMG_LoadTexture(sdlrenderer, filename.c_str());
     if (tex == nullptr) {
       trace("Could not load texture", filename, ":", SDL_GetError());
       // Let it go on.
     }
   }
-  return texture(id, tex);
+  return tex;
 }
 
 int renderbase::update() {
@@ -62,10 +75,18 @@ int renderbase::render() {
   
   for (zorder zpair : renderorder) {
     texture & t = *(zpair.second);
-    SDL_Rect dest = { t.x, t.y, t.w, t.h };
+    SDL_Rect dest;
+    if (!t.bind) {
+      dest = { t.x, t.y, t.w, t.h };
+    } else {
+      dest = { t.objx, t.objy, t.w, t.h };
+    }
+
     SDL_RenderCopyEx(sdlrenderer, t.raw, NULL, &dest, 0.0f, NULL, SDL_FLIP_NONE);
     total++;
   }
+
+  SDL_RenderPresent(sdlrenderer);
 
   return total;
 }

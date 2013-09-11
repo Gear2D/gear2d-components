@@ -22,21 +22,20 @@ class sigparser {
 
     template <typename datatype>
     link<datatype> init(std::string pid, const datatype & def = datatype()) {
-      com.init(pid, sig[pid], def);
-      return com.fetch<datatype>(pid);
+      modinfo("renderer2");
+      trace("Initializing from signature (as something)", pid);
+      return com.fetch<datatype>(pid, def);
     }
 
     link<std::string> init(std::string pid, std::string def = std::string("")) {
-      com.write(pid, sig[pid]);
-      return com.fetch<std::string>(pid);
+      modinfo("renderer2");
+      trace("Initializing from signature (as string)", pid);
+      return com.fetch<std::string>(pid, def);
     }
 };
 
 renderer2::renderer2() {
-<<<<<<< HEAD
-  renderbase::add(this);
-=======
->>>>>>> e3bb2751c82bfd07e6ee0ee68f03aaafca4a2cad
+
 }
 
 renderer2::~renderer2() { 
@@ -76,19 +75,26 @@ void renderer2::setup(object::signature & s) {
     /* get id=name */
     string id = surfdef.substr(0,  pos);
     string filename = surfdef.substr(pos+1);
-    string p(id + "."); p.reserve(4);
+    size_t s = id.size() + 1;
+    string p(id + ". ");
     
     /* wire texture parameters with links */
     trace("Loading", filename, "as", id);
-    textures[id] = renderbase::load(id, filename);
+    SDL_Texture * raw = renderbase::load(filename);
     texture & t = textures[id];
-    p[3] = 'x'; t.x = sig.init(p, .0f);
-    p[3] = 'y'; t.y = sig.init(p, .0f);
-    p[3] = 'z'; t.z = sig.init(p, .0f);
-    p[3] = 'w'; t.w = sig.init(p, 0);
-    p[3] = 'h'; t.h = sig.init(p, 0);
-    
-    texture t = renderbase::load(filename);
+    t.id = id;
+    p[s] = 'x'; t.x = sig.init(p, .0f);
+    p[s] = 'y'; t.y = sig.init(p, .0f);
+    p[s] = 'z'; t.z = sig.init(p, .0f);
+    p[s] = 'w'; t.w = sig.init(p, renderbase::querywidth(raw));
+    p[s] = 'h'; t.h = sig.init(p, renderbase::queryheight(raw));
+    t.bind = sig.init(id + ".bind", 0);
+    t.objx = sig.init("x", .0f);
+    t.objy = sig.init("y", .0f);
+    t.objz = sig.init("z", .0f);
+    t.raw = raw;
+
+    renderbase::renderorder.insert(make_pair(t.z, &t));
   }
 }
 

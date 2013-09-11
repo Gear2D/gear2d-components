@@ -1,17 +1,8 @@
 #include "texture.h"
 #include "SDL.h"
 
-texture::texture(const std::string & id, SDL_Texture * raw)
-  : raw(raw)
-  , w(0)
-  , h(0)
-  , x(0)
-  , y(0)
-  , z(0)
-  , id(id) {
-    if (raw == nullptr) return;
-    SDL_QueryTexture(raw, NULL, NULL, &w, &h);
-}
+texture::texture()
+  { }
 
 texture::texture(const texture & other) 
   : raw(other.raw)
@@ -20,7 +11,8 @@ texture::texture(const texture & other)
   , x(other.x)
   , y(other.y)
   , z(other.z)
-  , id(other.id) {
+  , id(other.id)
+  , bind(other.bind) {
 }
 
 bool texture::operator<(const texture & other) {
@@ -35,6 +27,7 @@ texture & texture::operator=(const texture & other) {
   y = other.y;
   z = other.z;
   id = other.id;
+  bind = other.bind;
   return *this;
 }
 
