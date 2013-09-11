@@ -42,8 +42,4 @@ class renderbase {
   public:
     static bool initialized;    
 };
-<<<<<<< HEAD
-# endif
-=======
-# endif
->>>>>>> e3bb2751c82bfd07e6ee0ee68f03aaafca4a2cad
+#endif

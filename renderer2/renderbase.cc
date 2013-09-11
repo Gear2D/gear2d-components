@@ -96,11 +96,6 @@ void renderbase::initialize(int width,  int height, bool fullscreen) {
     trace("Could not create window or renderer:", SDL_GetError());
     return;
   }
-<<<<<<< HEAD
   trace("Finished renderer initialization", log::info);
-}
-=======
-  trace("Finished renderer initialization",  log::info);
   initialized = true;
 }
->>>>>>> e3bb2751c82bfd07e6ee0ee68f03aaafca4a2cad

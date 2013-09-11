@@ -80,7 +80,6 @@ void renderer2::setup(object::signature & s) {
     
     /* wire texture parameters with links */
     trace("Loading", filename, "as", id);
-<<<<<<< HEAD
     textures[id] = renderbase::load(id, filename);
     texture & t = textures[id];
     p[3] = 'x'; t.x = sig.init(p, .0f);
@@ -89,9 +88,7 @@ void renderer2::setup(object::signature & s) {
     p[3] = 'w'; t.w = sig.init(p, 0);
     p[3] = 'h'; t.h = sig.init(p, 0);
     
-=======
     texture t = renderbase::load(filename);
->>>>>>> e3bb2751c82bfd07e6ee0ee68f03aaafca4a2cad
   }
 }
 
