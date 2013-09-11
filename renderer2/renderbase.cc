@@ -5,17 +5,20 @@
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 
-set<renderer2*> renderbase::renderers;
+//set<renderer2*> renderbase::renderers;
 map<string, SDL_Texture *> renderbase::rawtextures;
 bool renderbase::initialized = false;
 bool renderbase::error = false;
 int renderbase::votesleft = 0;
 int renderbase::starttime = 0;
+std::set<zorder> renderbase::renderorder;
+SDL_Renderer * renderbase::sdlrenderer;
+SDL_Window * renderbase::sdlwindow;
 
 
-void renderbase::add(renderer2 * renderer) {
+void renderbase::add(texture & t) {
   if (!initialized) initialize();
-  renderers.insert(renderer);
+  renderorder.emplace({t.z, &t});
 }
 
 void renderbase::remove(renderer2 * renderer) {
@@ -38,7 +41,7 @@ texture renderbase::load(const string & id, const string & filename) {
   return texture(id, tex);
 }
 
-int renderbase::update(float dt) {
+int renderbase::update() {
   /* decrease votes */
   if (votesleft > 0) {
     if ((SDL_GetTicks() - starttime) < 30) {
@@ -55,8 +58,15 @@ int renderbase::update(float dt) {
 }
 
 int renderbase::render() {
-  int total;
+  int total = 0;
   
+  for (zorder zpair : renderorder) {
+    texture & t = *(zpair.second);
+    SDL_Rect dest = { t.x, t.y, t.w, t.h };
+    SDL_RenderCopyEx(sdlrenderer, t.raw, NULL, &dest, 0.0f, NULL, SDL_FLIP_NONE);
+    total++;
+  }
+
   return total;
 }
 
@@ -66,6 +76,7 @@ void renderbase::initialize(int width,  int height, bool fullscreen) {
   int flags = 0;
   if (fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
   error = 0;
+  trace("Initializing renderer2 width =", width, "height =", height, "fullscreen =", fullscreen, log::info);
   if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
     trace("SDL was not initialized at all. Initializing SDL.");
     error = SDL_Init(SDL_INIT_VIDEO) != 0;
@@ -80,10 +91,16 @@ void renderbase::initialize(int width,  int height, bool fullscreen) {
       return;
     }
   }
-  error = SDL_CreateWindowAndRenderer(width, height, flags, sdlwindow, sdlrenderer) != 0;
+  error = SDL_CreateWindowAndRenderer(width, height, flags, &sdlwindow, &sdlrenderer) != 0;
   if (error) {
     trace("Could not create window or renderer:", SDL_GetError());
     return;
   }
+<<<<<<< HEAD
   trace("Finished renderer initialization", log::info);
 }
+=======
+  trace("Finished renderer initialization",  log::info);
+  initialized = true;
+}
+>>>>>>> e3bb2751c82bfd07e6ee0ee68f03aaafca4a2cad

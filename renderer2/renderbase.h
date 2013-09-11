@@ -9,7 +9,7 @@
 
 using namespace std;
 
-class render2;
+class renderer2;
 struct SDL_Texture;
 struct SDL_Renderer;
 struct SDL_Window;
@@ -22,7 +22,7 @@ class renderbase {
     static texture load(const string & id, const string & filename);
     static void add(renderer2 * renderer);
     static void remove(renderer2 * renderer);
-    static int update(float dt); /* may render. returns number of surfaces rendered */
+    static int update(); /* may render. returns number of surfaces rendered */
     
   private:
     static int render();
@@ -42,4 +42,8 @@ class renderbase {
   public:
     static bool initialized;    
 };
+<<<<<<< HEAD
 # endif
+=======
+# endif
+>>>>>>> e3bb2751c82bfd07e6ee0ee68f03aaafca4a2cad

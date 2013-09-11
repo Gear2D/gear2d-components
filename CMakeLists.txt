@@ -99,6 +99,29 @@ install(TARGETS spritesheet
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/animation
 )
 
+if(WIN32)
+	get_filename_component(SDL2_MIXER_LIBRARY_DIR ${SDL2_MIXER_LIBRARY} PATH)
+	set(SDL2_MIXER_DLLS
+		"${SDL2_MIXER_LIBRARY_DIR}/SDL2_mixer.dll"
+#		"${SDL2_MIXER_LIBRARY_DIR}/smpeg.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libvorbisfile-3.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libvorbis-0.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libogg-0.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libmikmod-2.dll"
+		"${SDL2_MIXER_LIBRARY_DIR}/libFLAC-8.dll"
+	)
+	message(STATUS "Packaging SDL2_mixer DLLs: ${SDL2_MIXER_DLLS}")
+	install(FILES ${SDL2_MIXER_DLLS}
+		DESTINATION bin
+	)
+	if(MINGW)
+		message(STATUS "Compiling with MINGW!")
+		set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static -lpthread")
+		set(CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc -static -lpthread")
+		set(CMAKE_MODULE_LINKER_FLAGS "-static-libstdc++ -static-libgcc -static -lpthread")
+	endif(MINGW)
+endif (WIN32)
+
 target_link_libraries(mouseover ${Gear2D_LIBRARY})
 target_link_libraries(keyboard ${SDL2_LIBRARY} ${Gear2D_LIBRARY})
 target_link_libraries(mouse ${SDL2_LIBRARY} ${Gear2D_LIBRARY})
@@ -113,22 +136,6 @@ target_link_libraries(spritesheet ${Gear2D_LIBRARY})
 #add_subdirectory(renderer)
 add_subdirectory(renderer2)
 
-if (WIN32)
-	get_filename_component(SDL2_MIXER_LIBRARY_DIR ${SDL2_MIXER_LIBRARY} PATH)
-	set(SDL2_MIXER_DLLS 
-		"${SDL2_MIXER_LIBRARY_DIR}/SDL2_mixer.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/smpeg.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libvorbisfile-3.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libvorbis-0.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libogg-0.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libmikmod-2.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libFLAC-8.dll"
-	)
-	message(STATUS "Packaging SDL2_mixer DLLs: ${SDL2_MIXER_DLLS}")
-	install(FILES ${SDL2_MIXER_DLLS}
-		DESTINATION bin
-	)
-endif (WIN32)
 add_subdirectory(doc)
 if (WIN32)
 	set(CPACK_SOURCE_GENERATOR ZIP)

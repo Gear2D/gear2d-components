@@ -33,10 +33,14 @@ class sigparser {
 };
 
 renderer2::renderer2() {
+<<<<<<< HEAD
   renderbase::add(this);
+=======
+>>>>>>> e3bb2751c82bfd07e6ee0ee68f03aaafca4a2cad
 }
 
 renderer2::~renderer2() { 
+
 }
 
 std::string renderer2::family() { return "renderer"; }
@@ -53,13 +57,15 @@ void renderer2::setup(object::signature & s) {
     fullscreen = eval<int>(s["renderer.fullscreen"], 0) == 1;
     renderbase::initialize(width, height, fullscreen);
   }
+
+  renderbase::add(this);
   
   surfacelist = sig.init("renderer.surfaces");
   size_t pos = string::npos;
   
   /* iterate through surface list */
   for (std::string surfdef : split(surfacelist, ' ')) {
-    size_t pos = surfdef.find('=');
+    pos = surfdef.find('=');
     
     // skip erroneous lines
     if (pos == string::npos) {
@@ -74,6 +80,7 @@ void renderer2::setup(object::signature & s) {
     
     /* wire texture parameters with links */
     trace("Loading", filename, "as", id);
+<<<<<<< HEAD
     textures[id] = renderbase::load(id, filename);
     texture & t = textures[id];
     p[3] = 'x'; t.x = sig.init(p, .0f);
@@ -82,11 +89,14 @@ void renderer2::setup(object::signature & s) {
     p[3] = 'w'; t.w = sig.init(p, 0);
     p[3] = 'h'; t.h = sig.init(p, 0);
     
+=======
+    texture t = renderbase::load(filename);
+>>>>>>> e3bb2751c82bfd07e6ee0ee68f03aaafca4a2cad
   }
 }
 
 void renderer2::update(timediff dt) {
-  renderbase::update((float)dt);
+  renderbase::update();
 }
 
 g2dcomponent(renderer2)

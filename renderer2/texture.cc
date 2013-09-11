@@ -10,7 +10,7 @@ texture::texture(const std::string & id, SDL_Texture * raw)
   , z(0)
   , id(id) {
     if (raw == nullptr) return;
-    SDL_QueryTexture(raw, NULL, NULL, w, h);
+    SDL_QueryTexture(raw, NULL, NULL, &w, &h);
 }
 
 texture::texture(const texture & other) 
