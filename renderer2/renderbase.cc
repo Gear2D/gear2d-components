@@ -23,18 +23,19 @@ void renderbase::remove(renderer2 * renderer) {
   renderers.erase(renderer);
 }
 
-texture renderbase::load(const string & filename) {
+texture renderbase::load(const string & id, const string & filename) {
   moderr("render2");
   if (!initialized) initialize();
-  SDL_Texture * texture = nullptr;
+  SDL_Texture * tex = nullptr;
   auto i = rawtextures.find(filename);
   if (i == rawtextures.end()) {                             // texture not there.
-    texture = IMG_LoadTexture(sdlrenderer, filename);
-    if (texture == nullptr) {
+    tex = IMG_LoadTexture(sdlrenderer, filename);
+    if (tex == nullptr) {
       trace("Could not load texture", filename, ":", SDL_GetError());
-      throw(evil());
+      // Let it go on.
     }
   }
+  return texture(id, tex);
 }
 
 int renderbase::update(float dt) {
@@ -84,5 +85,5 @@ void renderbase::initialize(int width,  int height, bool fullscreen) {
     trace("Could not create window or renderer:", SDL_GetError());
     return;
   }
-  trace("Finished renderer initialization",  log::info);
+  trace("Finished renderer initialization", log::info);
 }

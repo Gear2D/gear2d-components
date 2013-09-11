@@ -32,7 +32,7 @@ class sigparser {
     }
 };
 
-renderer2::renderer2() {  log::info
+renderer2::renderer2() {
   renderbase::add(this);
 }
 
@@ -70,9 +70,17 @@ void renderer2::setup(object::signature & s) {
     /* get id=name */
     string id = surfdef.substr(0,  pos);
     string filename = surfdef.substr(pos+1);
+    string p(id + "."); p.reserve(4);
     
+    /* wire texture parameters with links */
     trace("Loading", filename, "as", id);
-    texture t = renderbase::load(filename);
+    textures[id] = renderbase::load(id, filename);
+    texture & t = textures[id];
+    p[3] = 'x'; t.x = sig.init(p, .0f);
+    p[3] = 'y'; t.y = sig.init(p, .0f);
+    p[3] = 'z'; t.z = sig.init(p, .0f);
+    p[3] = 'w'; t.w = sig.init(p, 0);
+    p[3] = 'h'; t.h = sig.init(p, 0);
     
   }
 }

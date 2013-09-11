@@ -3,9 +3,10 @@
 
 #include "gear2d.h"
 #include <string>
+#include <map>
+#include "texture.h"
 
 using namespace gear2d;
-using std::string;
 
 class renderer2 : public component::base {
   public:
@@ -17,7 +18,8 @@ class renderer2 : public component::base {
     virtual ~renderer2();
     
   private:
-    link<string> surfacelist;
+    link<std::string> surfacelist;
+    std::map<std::string, texture> textures;
 };
 
 #endif

@@ -14,10 +14,12 @@ struct SDL_Texture;
 struct SDL_Renderer;
 struct SDL_Window;
 
+typedef pair<int, texture*> zorder;
+
 class renderbase {
   public:
     static void initialize(int width = 640, int height = 480, bool fullscreen = false);
-    static texture load(const string & filename);
+    static texture load(const string & id, const string & filename);
     static void add(renderer2 * renderer);
     static void remove(renderer2 * renderer);
     static int update(float dt); /* may render. returns number of surfaces rendered */
@@ -40,6 +42,4 @@ class renderbase {
   public:
     static bool initialized;    
 };
-
-typedef pair<int, texture*> zorder;
 # endif
