@@ -18,7 +18,7 @@ typedef pair<int, texture*> zorder;
 
 class renderbase {
   public:
-    static void initialize(int width = 640, int height = 480, bool fullscreen = false);
+    static void initialize(int width = 640, int height = 480, bool fullscreen = false, const string & filepath = "");
     static SDL_Texture * load(const string & filename);
     static int querywidth(SDL_Texture * texture);
     static int queryheight(SDL_Texture * texture);
@@ -43,5 +43,6 @@ class renderbase {
   public:
     static bool initialized;    
     static set<zorder> renderorder;
+    static std::string imgpath;
 };
 #endif

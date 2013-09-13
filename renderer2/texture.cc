@@ -12,7 +12,10 @@ texture::texture(const texture & other)
   , y(other.y)
   , z(other.z)
   , id(other.id)
-  , bind(other.bind) {
+  , bind(other.bind)
+  , rotation(other.rotation)
+  , alpha(other.alpha)
+{
 }
 
 bool texture::operator<(const texture & other) {

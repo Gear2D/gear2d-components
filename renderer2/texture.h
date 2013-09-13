@@ -21,6 +21,8 @@ struct texture {
     link<int> w, h;                                         // texture size
     link<int> bind;
     link<float> objx, objy, objz;
+    link<float> rotation;
+    link<float> alpha;
 };
 
 #endif

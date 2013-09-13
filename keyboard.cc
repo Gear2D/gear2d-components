@@ -150,12 +150,12 @@ class keyboard : public component::base {
       for (std::set<string>::iterator it = keylist.begin(); it != keylist.end(); it++) {
         // build keyname
         string keyname = *it;
-		SDL_Keycode keycode = SDL_GetKeyFromName(keyname.c_str());
-        if (keycode == SDLK_UNKNOWN) {
+        SDL_Scancode scode = SDL_GetScancodeFromName(keyname.c_str());
+        if (scode == SDL_SCANCODE_UNKNOWN) {
           trace("Key", keyname, "does not have a name. Dropping it.", log::warning);
           continue;
         }
-        
+
         // keep our own list of keys
         mykeys.insert(keyname);
         
@@ -166,7 +166,7 @@ class keyboard : public component::base {
         write<int>(keyname, (int)UNPRESSED);
         
         // tell the component system to check for these keys
-        usedkeys.insert(keycode);
+        usedkeys.insert(scode);
       }
     }
   private:
@@ -216,14 +216,15 @@ class keyboard : public component::base {
     }
 
     static void initialize() {
-      if (!SDL_WasInit(SDL_INIT_VIDEO)) {
-        if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0) {
+      if (!SDL_WasInit(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
+        if (SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
           logerr;
           trace("Event thread initialization failed!", SDL_GetError());
           throw (evil(string("(Keyboard Component) Event threat init fail! ") + SDL_GetError()));
         }
       }
       kbstate = SDL_GetKeyboardState(NULL);
+      SDL_NUM_SCANCODES;
       
       // initialize keynames...
       initialized = true;

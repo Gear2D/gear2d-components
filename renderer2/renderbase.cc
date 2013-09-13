@@ -11,6 +11,7 @@ bool renderbase::initialized = false;
 bool renderbase::error = false;
 int renderbase::votesleft = 0;
 int renderbase::starttime = 0;
+std::string renderbase::imgpath = "";
 std::set<zorder> renderbase::renderorder;
 SDL_Renderer * renderbase::sdlrenderer;
 SDL_Window * renderbase::sdlwindow;
@@ -41,13 +42,14 @@ int renderbase::querywidth(SDL_Texture *texture) {
 
 SDL_Texture * renderbase::load(const string & filename) {
   moderr("render2");
+  std::string filepath = imgpath + filename;
   if (!initialized) initialize();
   SDL_Texture * tex = nullptr;
   auto i = rawtextures.find(filename);
   if (i == rawtextures.end()) {                             // texture not there.
-    tex = IMG_LoadTexture(sdlrenderer, filename.c_str());
+    tex = IMG_LoadTexture(sdlrenderer, filepath.c_str());
     if (tex == nullptr) {
-      trace("Could not load texture", filename, ":", SDL_GetError());
+      trace("Could not load texture", filepath, ":", SDL_GetError(), log::error);
       // Let it go on.
     }
   }
@@ -82,7 +84,10 @@ int renderbase::render() {
       dest = { t.objx, t.objy, t.w, t.h };
     }
 
-    SDL_RenderCopyEx(sdlrenderer, t.raw, NULL, &dest, 0.0f, NULL, SDL_FLIP_NONE);
+    int alpha = t.alpha * 255;
+    SDL_SetTextureBlendMode(t.raw, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureAlphaMod(t.raw, alpha);
+    SDL_RenderCopyEx(sdlrenderer, t.raw, NULL, &dest, t.rotation, NULL, SDL_FLIP_NONE);
     total++;
   }
 
@@ -92,7 +97,7 @@ int renderbase::render() {
 }
 
 
-void renderbase::initialize(int width,  int height, bool fullscreen) {
+void renderbase::initialize(int width,  int height, bool fullscreen,const std::string & filepath) {
   moderr("render2");
   int flags = 0;
   if (fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
@@ -117,6 +122,13 @@ void renderbase::initialize(int width,  int height, bool fullscreen) {
     trace("Could not create window or renderer:", SDL_GetError());
     return;
   }
+
+  imgpath = filepath;
+  trim(imgpath);
+  if (imgpath.empty()) {
+    if (imgpath[imgpath.size()-1] != '/') imgpath += '/';
+  }
+
   trace("Finished renderer initialization", log::info);
   initialized = true;
 }

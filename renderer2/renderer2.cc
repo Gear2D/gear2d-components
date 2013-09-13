@@ -22,14 +22,12 @@ class sigparser {
 
     template <typename datatype>
     link<datatype> init(std::string pid, const datatype & def = datatype()) {
-      modinfo("renderer2");
-      trace("Initializing from signature (as something)", pid);
-      return com.fetch<datatype>(pid, def);
+      return com.fetch<datatype>(pid, eval<datatype>(sig[pid], def));
     }
 
     link<std::string> init(std::string pid, std::string def = std::string("")) {
-      modinfo("renderer2");
-      trace("Initializing from signature (as string)", pid);
+      auto it = sig.find(pid);
+      if (it != sig.end()) def = it->second;
       return com.fetch<std::string>(pid, def);
     }
 };
@@ -54,7 +52,7 @@ void renderer2::setup(object::signature & s) {
     width = eval<int>(s["renderer.w"], 640);
     height = eval<int>(s["renderer.h"], 480);
     fullscreen = eval<int>(s["renderer.fullscreen"], 0) == 1;
-    renderbase::initialize(width, height, fullscreen);
+    renderbase::initialize(width, height, fullscreen, s["imgpath"]);
   }
 
   renderbase::add(this);
@@ -88,11 +86,13 @@ void renderer2::setup(object::signature & s) {
     p[s] = 'z'; t.z = sig.init(p, .0f);
     p[s] = 'w'; t.w = sig.init(p, renderbase::querywidth(raw));
     p[s] = 'h'; t.h = sig.init(p, renderbase::queryheight(raw));
-    t.bind = sig.init(id + ".bind", 0);
+    t.bind = sig.init(id + ".bind", 1);
     t.objx = sig.init("x", .0f);
     t.objy = sig.init("y", .0f);
     t.objz = sig.init("z", .0f);
+    t.rotation = sig.init(id + ".rotation", .0f);
     t.raw = raw;
+    t.alpha = sig.init(id + ".alpha", 1.0f);
 
     renderbase::renderorder.insert(make_pair(t.z, &t));
   }
