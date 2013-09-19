@@ -84,14 +84,21 @@ class charactercontroller : public component::base {
     
     virtual void update(timediff dt) {
       string key("key.");
-//       cout << key + read<string>("controller.vertical-") << ": " << read<int>(key + read<string>("controller.vertical-")) << endl;
+      modinfo("charactercontroller");
       // vertical- pressed
-      if (read<int>(key + read<string>("controller.vertical-")) == 2 || read<int>("controller.vertical") < 0) { write("y.accel", -vaccel); }
-      else if (read<int>(key + read<string>("controller.vertical+")) == 2 || read<int>("controller.vertical") > 0) { write("y.accel", vaccel); }
+      if (read<int>(key + read<string>("controller.vertical-")) == 2 || read<int>("controller.vertical") < 0) {
+        trace(key + read<string>("controller.vertical-"), "pressed. vertical-", -vaccel);
+        write("y.accel", -vaccel);
+      }
+      else if (read<int>(key + read<string>("controller.vertical+")) == 2 || read<int>("controller.vertical") > 0) {
+        trace(key + read<string>("controller.vertical+"), "pressed. vertical+", vaccel);
+        write("y.accel", vaccel);
+      }
       
       // vertical not pressed at all.
-      else { 
+      else {
         const float & yspeed = raw<float>("y.speed");
+        trace("vertical not pressed.");
         if (yspeed > 0.0f) {
           if (yspeed + -vdaccel*dt < 0.0f){ write("y.speed", 0.0f); write("y.accel", 0.0f); }
           else write("y.accel", -vdaccel);
@@ -102,12 +109,19 @@ class charactercontroller : public component::base {
         
       }
       // horizontal pressed
-      if (read<int>(key + read<string>("controller.horizontal-")) == 2 || read<int>("controller.horizontal") < 0) { write("x.accel", -haccel); }
-      else if (read<int>(key + read<string>("controller.horizontal+")) == 2|| read<int>("controller.horizontal") > 0) { write("x.accel", haccel); }
+      if (read<int>(key + read<string>("controller.horizontal-")) == 2 || read<int>("controller.horizontal") < 0) {
+        trace(key + read<string>("controller.horizontal-"), "pressed. horizontal-", -haccel);
+        write("x.accel", -haccel);
+      }
+      else if (read<int>(key + read<string>("controller.horizontal+")) == 2|| read<int>("controller.horizontal") > 0) {
+        trace(key + read<string>("controller.horizontal+"), "pressed. horizontal+", -haccel);
+        write("x.accel", haccel);
+      }
       
       // horizontal not pressed at all.
       else { 
         const float & xspeed = raw<float>("x.speed");
+        trace("horizontal not pressed.");
         if (xspeed > 0.0f) {
           if (xspeed + -hdaccel*dt < 0.0f) { write("x.speed", 0.0f); write("x.accel", -xspeed); }
           else write("x.accel", -hdaccel);
