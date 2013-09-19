@@ -72,10 +72,10 @@ class keyboard : public component::base {
     static const Uint8 * kbstate;
     
     // A map between a SDL_Keycode and keystatus
-    static map<SDL_Keycode, keystatus> keys;
+    static map<SDL_Scancode, keystatus> keys;
     
     // set of all keys we have to check
-    static std::set<SDL_Keycode> usedkeys;
+    static std::set<SDL_Scancode> usedkeys;
     
     // all kb components
     static set<keyboard *> kbcomponents;
@@ -135,7 +135,7 @@ class keyboard : public component::base {
     // their friends of kb changes.
     void kbupdate() {
       for (std::set<string>::iterator it = mykeys.begin(); it != mykeys.end(); it++) {
-        SDL_Keycode key = SDL_GetKeyFromName(it->c_str());
+        SDL_Scancode key = SDL_GetScancodeFromName(it->c_str());
         // values has changed, indeed. notify
         if (keys[key].changed == true) {
           write(string("key.") + *it, keys[key].state);
@@ -171,12 +171,15 @@ class keyboard : public component::base {
     }
   private:
     static void doupdate() {
+      modinfo("keyboard");
       if (usedkeys.size() == 0) return;
       
-      for (std::set<SDL_Keycode>::iterator it = usedkeys.begin(); it != usedkeys.end(); it++) {
-        int key = *it;
+      for (auto it = usedkeys.begin(); it != usedkeys.end(); it++) {
+        SDL_Scancode key = *it;
         int rawstate = kbstate[key]; // pressed or not-pressed
         int status = keys[key].state; // unpressed, clicked, pressed, released
+
+        trace(SDL_GetScancodeName(key), key, rawstate, status);
         
 		// start unchanged in this frame
         keys[key].changed = false;
@@ -235,8 +238,8 @@ int keyboard::updated = 0;
 int keyboard::updaters = 0;
 bool keyboard::initialized = false;
 const Uint8 * keyboard::kbstate = 0;
-std::set<int> keyboard::usedkeys;
-std::map<SDL_Keycode, keyboard::keystatus> keyboard::keys;
+std::set<SDL_Scancode> keyboard::usedkeys;
+std::map<SDL_Scancode, keyboard::keystatus> keyboard::keys;
 set<keyboard *> keyboard::kbcomponents;
 
 g2dcomponent(keyboard);
