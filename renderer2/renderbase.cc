@@ -125,7 +125,7 @@ void renderbase::initialize(int width,  int height, bool fullscreen,const std::s
 
   imgpath = filepath;
   trim(imgpath);
-  if (imgpath.empty()) {
+  if (!imgpath.empty()) {
     if (imgpath[imgpath.size()-1] != '/') imgpath += '/';
   }
 
