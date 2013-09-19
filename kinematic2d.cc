@@ -69,6 +69,7 @@ class kinetic2d
       init<float>("y.accel.min", sig["y.accel.min"], -read<float>("y.accel.max"));      
     }
     virtual void update(timediff dt) {
+      modinfo("kinematic2d");
       float xaccel, yaccel, xspeed, yspeed;
       
       /* read actual values */
@@ -81,9 +82,13 @@ class kinetic2d
       write<float>("x.accel", xaccel);
       write<float>("y.accel", yaccel);
       
+      add("x", xspeed * dt);
+      add("y", yspeed * dt);
+
       /* use rk4 to update position */
-      add("x", xspeed * dt + xaccel * dt * dt * .5);
-      add("y", yspeed * dt + yaccel * dt * dt * .5);
+      // add("x", xspeed * dt + xaccel * dt * dt * .5);
+      // add("y", yspeed * dt + yaccel * dt * dt * .5);
+      trace("Yeah! Updating x and y: ", read<float>("x"), read<float>("y"));
       
       /* update speed */
       xspeed += xaccel * dt;
