@@ -46,13 +46,14 @@ std::string renderer2::type() { return "renderer2"; }
 void renderer2::setup(object::signature & s) {
   modinfo("renderer2");
   sigparser sig(s, this);
+  int screenwidth; int screenheight;
+  screenwidth = sig.init("renderer.w", 640);
+  screenheight = sig.init("renderer.h", 480);
   
   if (!renderbase::initialized) {
-    int width; int height; bool fullscreen;
-    width = eval<int>(s["renderer.w"], 640);
-    height = eval<int>(s["renderer.h"], 480);
+     bool fullscreen;
     fullscreen = eval<int>(s["renderer.fullscreen"], 0) == 1;
-    renderbase::initialize(width, height, fullscreen, s["imgpath"]);
+    renderbase::initialize(screenwidth, screenheight, fullscreen, s["imgpath"]);
   }
 
   renderbase::add(this);
