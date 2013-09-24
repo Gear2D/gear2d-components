@@ -36,8 +36,14 @@ renderer2::renderer2() {
 
 }
 
-renderer2::~renderer2() { 
+void renderer2::destroyed() {
+  for (auto textureitr : textures) {
+    texture & t = textureitr.second;
+    renderbase::renderorder.erase(make_pair(t.z, &t));
+  }
+}
 
+renderer2::~renderer2() { 
 }
 
 std::string renderer2::family() { return "renderer"; }

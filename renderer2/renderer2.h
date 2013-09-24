@@ -16,6 +16,7 @@ class renderer2 : public component::base {
     virtual void setup(object::signature & sig);
     virtual void update(timediff dt);
     virtual ~renderer2();
+    virtual void destroyed();
     
   private:
     link<std::string> surfacelist;
