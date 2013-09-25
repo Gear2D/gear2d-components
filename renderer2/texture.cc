@@ -16,6 +16,8 @@ texture::texture(const texture & other)
   , rotation(other.rotation)
   , alpha(other.alpha)
 {
+  modinfo("renderer2");
+  trace("Making a copy to", this, other.id, "from", &other, "just for you :(");
 }
 
 bool texture::operator<(const texture & other) {
@@ -23,6 +25,8 @@ bool texture::operator<(const texture & other) {
 }
 
 texture & texture::operator=(const texture & other) {
+  modinfo("renderer2");
+  trace("Making a copy to", this, other.id, "from", &other, "just for you :(");
   raw = other.raw;
   w = other.w;
   h = other.h;
@@ -31,6 +35,8 @@ texture & texture::operator=(const texture & other) {
   z = other.z;
   id = other.id;
   bind = other.bind;
+  
+  
   return *this;
 }
 

@@ -37,9 +37,12 @@ renderer2::renderer2() {
 }
 
 void renderer2::destroyed() {
+  modinfo("renderer2");
   for (auto textureitr : textures) {
-    texture & t = textureitr.second;
-    renderbase::renderorder.erase(make_pair(t.z, &t));
+    texture * tp = textureitr.second;
+    int e = renderbase::renderorder.erase(zorder(tp->z, tp));
+    trace("Removing", tp->id, "from renderer order. this =", this, "Result:", e);
+    delete tp;
   }
 }
 
@@ -57,7 +60,7 @@ void renderer2::setup(object::signature & s) {
   screenheight = sig.init("renderer.h", 480);
   
   if (!renderbase::initialized) {
-     bool fullscreen;
+    bool fullscreen;
     fullscreen = eval<int>(s["renderer.fullscreen"], 0) == 1;
     renderbase::initialize(screenwidth, screenheight, fullscreen, s["imgpath"]);
   }
@@ -86,7 +89,9 @@ void renderer2::setup(object::signature & s) {
     /* wire texture parameters with links */
     trace("Loading", filename, "as", id);
     SDL_Texture * raw = renderbase::load(filename);
-    texture & t = textures[id];
+    texture * tp = new texture();
+    textures[id] = tp;
+    texture & t = *tp;
     t.id = id;
     p[s] = 'x'; t.x = sig.init(p, .0f);
     p[s] = 'y'; t.y = sig.init(p, .0f);
@@ -101,7 +106,7 @@ void renderer2::setup(object::signature & s) {
     t.raw = raw;
     t.alpha = sig.init(id + ".alpha", 1.0f);
 
-    renderbase::renderorder.insert(make_pair(t.z, &t));
+    renderbase::renderorder.insert(zorder(t.z, tp));
   }
 }
 

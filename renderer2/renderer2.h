@@ -20,7 +20,7 @@ class renderer2 : public component::base {
     
   private:
     link<std::string> surfacelist;
-    std::map<std::string, texture> textures;
+    std::map<std::string, texture *> textures;
 };
 
 #endif
