@@ -27,20 +27,47 @@ using namespace gear2d;
 #include <string>
 using namespace std;
 
+class sigparser {
+  private:
+    object::signature & sig;
+    component::base & com;
+
+  public:
+    sigparser(object::signature & sig, component::base * com)
+      : sig(sig)
+      , com(*com)
+    { }
+
+    template <typename datatype>
+    link<datatype> init(std::string pid, const datatype & def = datatype()) {
+      return com.fetch<datatype>(pid, eval<datatype>(sig[pid], def));
+    }
+
+    link<std::string> init(std::string pid, std::string def = std::string("")) {
+      auto it = sig.find(pid);
+      if (it != sig.end()) def = it->second;
+      return com.fetch<std::string>(pid, def);
+    }
+};
+
 class collider : public component::base {
   private:
     struct colaabb {
-      float x;
-      float y;
-      float w;
-      float h;
-      colaabb(float x = 0, float y = 0, float w = 0, float h = 0) : x(x), y(y), w(w), h(h) { }
+      link<float> x;
+      link<float> y;
+      link<float> w;
+      link<float> h;
+      colaabb() { }
+    };
+
+    struct rect {
+        float x, y, w, h;
     };
     
     colaabb aabb;
     
-    string tag;
-    string ignore;
+    link<string> tag;
+    link<string> ignore;
     
   public:
     virtual ~collider() { colliders.erase(this); }
@@ -50,45 +77,53 @@ class collider : public component::base {
     virtual void handle(parameterbase::id pid, base* lastwrite, object::id owner) {
     }
     
-    virtual void setup(object::signature & sig) { 
-      init<string>("collider.type", sig["collider.type"], "aabb");
-      init("collider.usez", sig["collider.usez"], false);
-      
-      bool binded = eval(sig["colliderd.bind"], true);
-      write("collider.bind", binded); 
-      
+    virtual void setup(object::signature & sig) {
+      sigparser s(sig, this);
+
+      s.init("collider.type", string("aabb"));
+      link<bool> binded = s.init("collider.bind", true);
+
+//      bool binded = eval(sig["colliderd.bind"], true);
+//      write("collider.bind", binded);
+
       float x, y, w, h;
       read("x", x); read("y", y), read("w", w), read("h", h);
       hook("w"); hook("h");
 
-      aabb.x = eval<float>(sig["collider.aabb.x"], 0.0f);
-      bind("collider.aabb.x", aabb.x);
-      
-      aabb.y = eval<float>(sig["collider.aabb.y"], 0.0f);
-      bind("collider.aabb.y", aabb.y);
-      
-      aabb.w = eval(sig["collider.aabb.w"], w);
-      bind("collider.aabb.w", aabb.w);
-      
-      aabb.h = eval(sig["collider.aabb.h"], h);
-      bind("collider.aabb.h", aabb.h);
+      aabb.x = s.init("collider.aabb.x", 0.0f);
+      //aabb.x = eval<float>(sig["collider.aabb.x"], 0.0f);
+      //bind("collider.aabb.x", aabb.x);
+
+      aabb.y = s.init("collider.aabb.y", 0.0f);
+      //aabb.y = eval<float>(sig["collider.aabb.y"], 0.0f);
+      //bind("collider.aabb.y", aabb.y);
+
+      aabb.w = s.init("collider.aabb.w", w);
+      //aabb.w = eval(sig["collider.aabb.w"], w);
+      //bind("collider.aabb.w", aabb.w);
+
+      aabb.h = s.init("collider.aabb.h", h);
+      //aabb.h = eval(sig["collider.aabb.h"], h);
+      //bind("collider.aabb.h", aabb.h);
+
       write<component::base *>("collider.collision", 0);
-      
       write("collider.collision.side", -1);
-      
+
       write<float>("collider.collision.speed.x", 0);
       write<float>("collider.collision.speed.y", 0);
-      
+
       write<float>("collider.collision.x", 0);
       write<float>("collider.collision.y", 0);
       write<float>("collider.collision.w", 0);
       write<float>("collider.collision.h", 0);
       
-      bind("collider.tag", tag);
-      bind("collider.ignore", ignore);
-      ignore = sig["collider.ignore"];
-      tag = sig["collider.tag"];
-      if (tag == "") tag = sig["name"];
+      tag = s.init<std::string>("collider.tag");
+      //bind("collider.tag", tag);
+      ignore = s.init<std::string>("collider.ignore");
+      //bind("collider.ignore", ignore);
+      //ignore = sig["collider.ignore"];
+      //tag = sig["collider.tag"];
+      if ((string)tag == "") tag = sig["name"];
       
       colliders.insert(this);
     }
@@ -122,7 +157,8 @@ class collider : public component::base {
           const string & stype = second->raw<string>("collider.type");
           const bool & fbind = first->raw<bool>("collider.bind");
           const bool & sbind = second->raw<bool>("collider.bind");
-          colaabb faabb(first->aabb), saabb(second->aabb);
+          rect faabb { first->aabb.x, first->aabb.y, first->aabb.w, first->aabb.h };
+          rect saabb { second->aabb.x, second->aabb.y, second->aabb.w, second->aabb.h };
           
           if (fbind) {
             faabb.x += first->raw<float>("x");
@@ -136,7 +172,7 @@ class collider : public component::base {
           
           if (testaabb(faabb, saabb)) {
             // calculates intersection
-            colaabb inter;
+            rect inter;
             inter.x = max(faabb.x, saabb.x);
             inter.y = max(faabb.y, saabb.y);
             inter.w = min(faabb.x + faabb.w, saabb.x + saabb.w) - max(faabb.x, saabb.x);
@@ -171,18 +207,18 @@ class collider : public component::base {
             second->write<float>("collider.collision.speed.x", first->read<float>("x.speed"));
             second->write<float>("collider.collision.speed.y", first->read<float>("y.speed"));
             
-            if (first->ignore.find(second->tag) == string::npos) {
+            if (((string)first->ignore).find(second->tag) == string::npos) {
               first->write<component::base *>("collider.collision", second);
             }
               
-            if (second->ignore.find(first->tag) == string::npos) {
+            if (((string)first->ignore).find(first->tag) == string::npos) {
               second->write<component::base *>("collider.collision", first);
             }
           }
         }
       }
     }
-    static bool testaabb(colaabb & a, colaabb & b) {
+    static bool testaabb(rect & a, rect & b) {
       return (
         (b.x < a.x + a.w) &&
         (b.x + b.w > a.x) &&
