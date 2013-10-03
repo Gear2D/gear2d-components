@@ -52,22 +52,52 @@ class sigparser {
 
 class collider : public component::base {
   private:
-    struct colaabb {
+    struct linkrect {
       link<float> x;
       link<float> y;
       link<float> w;
       link<float> h;
-      colaabb() { }
+    };
+
+    /*
+      write<component::base *>("collider.collision", 0);
+      write("collider.collision.side", -1);
+
+      write<float>("collider.collision.speed.x", 0);
+      write<float>("collider.collision.speed.y", 0);
+
+      write<float>("collider.collision.x", 0);
+      write<float>("collider.collision.y", 0);
+      write<float>("collider.collision.w", 0);
+      write<float>("collider.collision.h", 0);
+      */
+    struct collisioninfo {
+      /* information about the collisor */
+      link<component::base *> collisor;
+      link<float> speedx;
+      link<float> speedy;
+
+      /* side of the collision, relative to this object */
+      link<int> side;
+
+      /* intersection coordinates */
+      link<float> ix;
+      link<float> iy;
+      link<float> iw;
+      link<float> ih;
     };
 
     struct rect {
-        float x, y, w, h;
+      float x, y, w, h;
     };
-    
-    colaabb aabb;
+
+    collisioninfo collision;
+    linkrect aabb;
     
     link<string> tag;
     link<string> ignore;
+    link<bool> binded;
+    link<std::string> coltype;
     
   public:
     virtual ~collider() { colliders.erase(this); }
@@ -80,8 +110,8 @@ class collider : public component::base {
     virtual void setup(object::signature & sig) {
       sigparser s(sig, this);
 
-      s.init("collider.type", string("aabb"));
-      link<bool> binded = s.init("collider.bind", true);
+      coltype = s.init("collider.type", string("aabb"));
+      binded = s.init("collider.bind", true);
 
 //      bool binded = eval(sig["colliderd.bind"], true);
 //      write("collider.bind", binded);
@@ -91,32 +121,30 @@ class collider : public component::base {
       hook("w"); hook("h");
 
       aabb.x = s.init("collider.aabb.x", 0.0f);
-      //aabb.x = eval<float>(sig["collider.aabb.x"], 0.0f);
-      //bind("collider.aabb.x", aabb.x);
-
       aabb.y = s.init("collider.aabb.y", 0.0f);
-      //aabb.y = eval<float>(sig["collider.aabb.y"], 0.0f);
-      //bind("collider.aabb.y", aabb.y);
-
       aabb.w = s.init("collider.aabb.w", w);
-      //aabb.w = eval(sig["collider.aabb.w"], w);
-      //bind("collider.aabb.w", aabb.w);
-
       aabb.h = s.init("collider.aabb.h", h);
-      //aabb.h = eval(sig["collider.aabb.h"], h);
-      //bind("collider.aabb.h", aabb.h);
 
-      write<component::base *>("collider.collision", 0);
-      write("collider.collision.side", -1);
+      collision.collisor = fetch<component::base *>("collider.collision");
+      //write<component::base *>("collider.collision", 0);
 
-      write<float>("collider.collision.speed.x", 0);
-      write<float>("collider.collision.speed.y", 0);
+      collision.side = s.init("collider.collision.side", -1);
+//      write("collider.collision.side", -1);
 
-      write<float>("collider.collision.x", 0);
-      write<float>("collider.collision.y", 0);
-      write<float>("collider.collision.w", 0);
-      write<float>("collider.collision.h", 0);
-      
+      collision.speedx = s.init("collider.collision.speed.x", 0);
+      collision.speedy = s.init("collider.collision.speed.y", 0);
+      //write<float>("collider.collision.speed.x", 0);
+      //write<float>("collider.collision.speed.y", 0);
+
+      collision.ix = s.init("collider.collision.x", 0);
+      collision.iy = s.init("collider.collision.y", 0);
+      collision.iw = s.init("collider.collision.w", 0);
+      collision.ih = s.init("collider.collision.h", 0);
+      //write<float>("collider.collision.x", 0);
+      //write<float>("collider.collision.y", 0);
+      //write<float>("collider.collision.w", 0);
+      //write<float>("collider.collision.h", 0);
+
       tag = s.init<std::string>("collider.tag");
       //bind("collider.tag", tag);
       ignore = s.init<std::string>("collider.ignore");
@@ -153,10 +181,14 @@ class collider : public component::base {
         j++;
         for (; j != colliders.end(); j++) {
           collider * second = *j;
-          const string & ftype = first->raw<string>("collider.type");
-          const string & stype = second->raw<string>("collider.type");
-          const bool & fbind = first->raw<bool>("collider.bind");
-          const bool & sbind = second->raw<bool>("collider.bind");
+          //const string & ftype = first->raw<string>("collider.type");
+          //const string & stype = second->raw<string>("collider.type");
+
+          const bool & fbind = first->binded;
+          //const bool & fbind = first->raw<bool>("collider.bind");
+          const bool & sbind = second->binded;
+          //const bool & sbind = second->raw<bool>("collider.bind");
+
           rect faabb { first->aabb.x, first->aabb.y, first->aabb.w, first->aabb.h };
           rect saabb { second->aabb.x, second->aabb.y, second->aabb.w, second->aabb.h };
           
