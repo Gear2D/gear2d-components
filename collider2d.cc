@@ -93,6 +93,23 @@ class collider : public component::base {
 
     collisioninfo collision;
     linkrect aabb;
+
+    /* spatial stuff. we store z and d because
+     * we may want to consider them for collisions */
+    struct {
+      link<float> x;
+      link<float> y;
+      link<float> z;
+      link<float> w;
+      link<float> h;
+      link<float> d;
+    } spatial;
+
+    struct {
+      link<float> speedx;
+      link<float> speedy;
+    } kinematics;
+
     
     link<string> tag;
     link<string> ignore;
@@ -103,7 +120,7 @@ class collider : public component::base {
     virtual ~collider() { colliders.erase(this); }
     virtual component::type type() { return "collider2d"; }
     virtual component::family family() { return "collider"; }
-    virtual string depends() { return "spatial/space2d"; }
+    virtual string depends() { return "spatial/space2d kinematics/kinematic2d"; }
     virtual void handle(parameterbase::id pid, base* lastwrite, object::id owner) {
     }
     
@@ -125,21 +142,32 @@ class collider : public component::base {
       aabb.w = s.init("collider.aabb.w", w);
       aabb.h = s.init("collider.aabb.h", h);
 
+      spatial.x = fetch<float>("x");
+      spatial.y = fetch<float>("y");
+      spatial.z = fetch<float>("z");
+      spatial.w = fetch<float>("w");
+      spatial.h = fetch<float>("h");
+      spatial.d = fetch<float>("d");
+
+      kinematics.speedx = fetch<float>("x.speed");
+      kinematics.speedy = fetch<float>("y.speed");
+
+
       collision.collisor = fetch<component::base *>("collider.collision");
       //write<component::base *>("collider.collision", 0);
 
       collision.side = s.init("collider.collision.side", -1);
 //      write("collider.collision.side", -1);
 
-      collision.speedx = s.init("collider.collision.speed.x", 0);
-      collision.speedy = s.init("collider.collision.speed.y", 0);
+      collision.speedx = s.init("collider.collision.speed.x", 0.0f);
+      collision.speedy = s.init("collider.collision.speed.y", 0.0f);
       //write<float>("collider.collision.speed.x", 0);
       //write<float>("collider.collision.speed.y", 0);
 
-      collision.ix = s.init("collider.collision.x", 0);
-      collision.iy = s.init("collider.collision.y", 0);
-      collision.iw = s.init("collider.collision.w", 0);
-      collision.ih = s.init("collider.collision.h", 0);
+      collision.ix = s.init("collider.collision.x", .0f);
+      collision.iy = s.init("collider.collision.y", .0f);
+      collision.iw = s.init("collider.collision.w", .0f);
+      collision.ih = s.init("collider.collision.h", .0f);
       //write<float>("collider.collision.x", 0);
       //write<float>("collider.collision.y", 0);
       //write<float>("collider.collision.w", 0);
@@ -193,13 +221,14 @@ class collider : public component::base {
           rect saabb { second->aabb.x, second->aabb.y, second->aabb.w, second->aabb.h };
           
           if (fbind) {
-            faabb.x += first->raw<float>("x");
-            faabb.y += first->raw<float>("y");
+            faabb.x += first->spatial.x;
+            faabb.y += first->spatial.y;
+            // todo: z
           }
           
           if (sbind) {
-            saabb.x += second->raw<float>("x");
-            saabb.y += second->raw<float>("y");
+            saabb.x += second->spatial.x;
+            saabb.y += second->spatial.y;
           }
           
           if (testaabb(faabb, saabb)) {
@@ -223,21 +252,39 @@ class collider : public component::base {
               else { fc = 3; sc = 1; }
             }
             
-            first->write<float>("collider.collision.x", inter.x);
-            first->write<float>("collider.collision.y", inter.y);
-            first->write<float>("collider.collision.w", inter.w);
-            first->write<float>("collider.collision.h", inter.h);
-            first->write<int>("collider.collision.side", fc);
-            first->write<float>("collider.collision.speed.x", second->read<float>("x.speed"));
-            first->write<float>("collider.collision.speed.y", second->read<float>("y.speed"));
+            first->collision.ix = inter.x;
+            first->collision.iy = inter.y;
+            first->collision.iw = inter.w;
+            first->collision.ih = inter.h;
+            //first->write<float>("collider.collision.x", inter.x);
+            //first->write<float>("collider.collision.y", inter.y);
+            //first->write<float>("collider.collision.w", inter.w);
+            //first->write<float>("collider.collision.h", inter.h);
+
+            first->collision.side = fc;
+            //first->write<int>("collider.collision.side", fc);
+
+            first->collision.speedx = second->kinematics.speedx;
+            first->collision.speedy = second->kinematics.speedy;
+            //first->write<float>("collider.collision.speed.x", second->read<float>("x.speed"));
+            //first->write<float>("collider.collision.speed.y", second->read<float>("y.speed"));
             
-            second->write<float>("collider.collision.x", inter.x);
-            second->write<float>("collider.collision.y", inter.y);
-            second->write<float>("collider.collision.w", inter.w);
-            second->write<float>("collider.collision.h", inter.h);
-            second->write<int>("collider.collision.side", sc);
-            second->write<float>("collider.collision.speed.x", first->read<float>("x.speed"));
-            second->write<float>("collider.collision.speed.y", first->read<float>("y.speed"));
+            second->collision.ix = inter.x;
+            second->collision.iy = inter.y;
+            second->collision.iw = inter.w;
+            second->collision.ih = inter.h;
+            //second->write<float>("collider.collision.x", inter.x);
+            //second->write<float>("collider.collision.y", inter.y);
+            //second->write<float>("collider.collision.w", inter.w);
+            //second->write<float>("collider.collision.h", inter.h);
+
+            second->collision.side = sc;
+            //second->write<int>("collider.collision.side", sc);
+
+            second->collision.speedx = first->kinematics.speedx;
+            second->collision.speedy = first->kinematics.speedy;
+            //second->write<float>("collider.collision.speed.x", first->read<float>("x.speed"));
+            //second->write<float>("collider.collision.speed.y", first->read<float>("y.speed"));
             
             if (((string)first->ignore).find(second->tag) == string::npos) {
               first->write<component::base *>("collider.collision", second);
