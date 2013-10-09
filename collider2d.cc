@@ -232,6 +232,8 @@ class collider : public component::base {
           }
           
           if (testaabb(faabb, saabb)) {
+            modinfo("collider2d");
+            trace(first->owner->name(), "collides with",  second->owner->name());
             // calculates intersection
             rect inter;
             inter.x = max(faabb.x, saabb.x);
@@ -287,10 +289,14 @@ class collider : public component::base {
             //second->write<float>("collider.collision.speed.y", first->read<float>("y.speed"));
             
             if (((string)first->ignore).find(second->tag) == string::npos) {
+              string name = first->owner->name();
+              trace("warning", name);
               first->write<component::base *>("collider.collision", second);
             }
               
-            if (((string)first->ignore).find(first->tag) == string::npos) {
+            if (((string)second->ignore).find(first->tag) == string::npos) {
+              string name = second->owner->name();
+              trace("warning", name);
               second->write<component::base *>("collider.collision", first);
             }
           }
