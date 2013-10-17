@@ -71,7 +71,7 @@ void renderer2::setup(object::signature & s) {
   size_t pos = string::npos;
   
   /* iterate through surface list */
-  for (std::string surfdef : split(surfacelist, ' ')) {
+  for (std::string surfdef : split<std::list<std::string>>(surfacelist, ' ')) {
     pos = surfdef.find('=');
     
     // skip erroneous lines

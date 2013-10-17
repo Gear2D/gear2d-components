@@ -79,9 +79,10 @@ int renderbase::render() {
     texture & t = *(zpair.second);
     SDL_Rect dest;
     if (!t.bind) {
-      dest = { t.x, t.y, t.w, t.h };
+      dest.x = t.x; dest.y = t.y; dest.w = t.w; dest.h = t.h;
     } else {
-      dest = { t.objx, t.objy, t.w, t.h };
+      dest.x = t.objx; dest.y = t.objy; dest.w = t.w; dest.h = t.h;
+      //dest = { t.objx, t.objy, t.w, t.h };
     }
 
     int alpha = t.alpha * 255;
