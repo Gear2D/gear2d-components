@@ -217,8 +217,8 @@ class collider : public component::base {
           const bool & sbind = second->binded;
           //const bool & sbind = second->raw<bool>("collider.bind");
 
-          rect faabb { first->aabb.x, first->aabb.y, first->aabb.w, first->aabb.h };
-          rect saabb { second->aabb.x, second->aabb.y, second->aabb.w, second->aabb.h };
+          rect faabb = { first->aabb.x, first->aabb.y, first->aabb.w, first->aabb.h };
+          rect saabb = { second->aabb.x, second->aabb.y, second->aabb.w, second->aabb.h };
           
           if (fbind) {
             faabb.x += first->spatial.x;
