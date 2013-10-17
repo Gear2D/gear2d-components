@@ -3,7 +3,6 @@
 
 #include "SDL.h"
 #include "SDL_image.h"
-#include "SDL_ttf.h"
 
 //set<renderer2*> renderbase::renderers;
 map<string, SDL_Texture *> renderbase::rawtextures;
@@ -74,6 +73,9 @@ int renderbase::update() {
 
 int renderbase::render() {
   int total = 0;
+  modinfo("renderbase");
+  
+  SDL_RenderClear(sdlrenderer);
   
   for (zorder zpair : renderorder) {
     texture & t = *(zpair.second);
@@ -84,11 +86,21 @@ int renderbase::render() {
       dest.x = t.objx; dest.y = t.objy; dest.w = t.w; dest.h = t.h;
       //dest = { t.objx, t.objy, t.w, t.h };
     }
-
+    
+    SDL_Rect src;
+    src.x = t.clip.x; src.y = t.clip.y; src.w = t.clip.w; src.h = t.clip.h;
+    dest.w = src.w;
+    dest.h = src.h;
+    
+    //SDL_Point center;
+    //center.x = (dest.x + dest.w)/2.0f;
+    //center.y = (dest.y + dest.y)/2.0f;
+    
     int alpha = t.alpha * 255;
     SDL_SetTextureBlendMode(t.raw, SDL_BLENDMODE_BLEND);
     SDL_SetTextureAlphaMod(t.raw, alpha);
-    SDL_RenderCopyEx(sdlrenderer, t.raw, NULL, &dest, t.rotation, NULL, SDL_FLIP_NONE);
+    trace(t.id, "clip:", src.x, src.y, dest.w, dest.h);
+    SDL_RenderCopyEx(sdlrenderer, t.raw, &src, &dest, t.rotation, NULL, SDL_FLIP_NONE);
     total++;
   }
 

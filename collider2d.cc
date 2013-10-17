@@ -289,15 +289,11 @@ class collider : public component::base {
             //second->write<float>("collider.collision.speed.y", first->read<float>("y.speed"));
             
             if (((string)first->ignore).find(second->tag) == string::npos) {
-              string name = first->owner->name();
-              trace("warning", name);
-              first->write<component::base *>("collider.collision", second);
+              first->collision.collisor = second;
             }
               
             if (((string)second->ignore).find(first->tag) == string::npos) {
-              string name = second->owner->name();
-              trace("warning", name);
-              second->write<component::base *>("collider.collision", first);
+              second->collision.collisor = first;
             }
           }
         }

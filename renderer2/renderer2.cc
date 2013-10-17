@@ -67,10 +67,12 @@ void renderer2::setup(object::signature & s) {
 
   renderbase::add(this);
   
+  textlist = sig.init("renderer.texts");
   surfacelist = sig.init("renderer.surfaces");
   size_t pos = string::npos;
   
   /* iterate through surface list */
+  /* iterate through surface list,  initializing each one of them */
   for (std::string surfdef : split<std::list<std::string>>(surfacelist, ' ')) {
     pos = surfdef.find('=');
     
@@ -105,6 +107,10 @@ void renderer2::setup(object::signature & s) {
     t.rotation = sig.init(id + ".rotation", .0f);
     t.raw = raw;
     t.alpha = sig.init(id + ".alpha", 1.0f);
+    t.clip.x = sig.init(id + ".clip.x", 0);
+    t.clip.y = sig.init(id + ".clip.y", 0);
+    t.clip.w = sig.init(id + ".clip.w", renderbase::querywidth(raw));
+    t.clip.h = sig.init(id + ".clip.h", renderbase::queryheight(raw));
 
     renderbase::renderorder.insert(zorder(t.z, tp));
   }

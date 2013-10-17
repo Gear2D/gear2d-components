@@ -4,15 +4,13 @@
 #include <string>
 #include "gear2d.h"
 
+
 using namespace gear2d;
 
 struct SDL_Texture;
 
 struct texture {
     texture();
-    texture(const texture & other);
-    texture & operator=(const texture & other);
-    bool operator<(const texture & other);
     ~texture();
 
     std::string id;
@@ -23,6 +21,12 @@ struct texture {
     link<float> objx, objy, objz;
     link<float> rotation;
     link<float> alpha;
+    struct {
+      link<int> x;
+      link<int> y;
+      link<int> w;
+      link<int> h;
+    } clip;
 };
 
 #endif
