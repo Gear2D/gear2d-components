@@ -3,7 +3,7 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(Gear2D REQUIRED)
 
-add_library(renderer2 MODULE renderer2.cc renderer2.h renderbase.h renderbase.cc texture.h texture.cc text.h text.cc)
+add_library(renderer2 MODULE renderer2.cc renderer2.h renderbase.h renderbase.cc texture.h texture.cc)
 
 install(TARGETS renderer2
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer

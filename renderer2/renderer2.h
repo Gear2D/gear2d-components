@@ -5,7 +5,6 @@
 #include <string>
 #include <map>
 #include "texture.h"
-#include "text.h"
 
 using namespace gear2d;
 
@@ -23,7 +22,6 @@ class renderer2 : public component::base {
     link<std::string> surfacelist;
     link<std::string> textlist;
     std::map<std::string, texture *> textures;
-    std::map<std::string, text *> texts;
 };
 
 #endif
