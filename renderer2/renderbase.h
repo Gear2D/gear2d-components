@@ -39,10 +39,13 @@ class renderbase {
     static int votesleft;
     static int starttime;
     static bool error;
+
+    static SDL_Texture * numberstex;
     
   public:
     static bool initialized;    
     static set<zorder> renderorder;
     static std::string imgpath;
+    static bool showfps;
 };
 #endif
