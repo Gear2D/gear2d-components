@@ -9,8 +9,6 @@ install(TARGETS renderer2
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
 )
 
-add_definitions(-std=c++11)
-
 target_link_libraries(renderer2 ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY} ${Gear2D_LIBRARY})
 
 if (WIN32)
