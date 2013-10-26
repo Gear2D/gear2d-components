@@ -41,8 +41,45 @@ using namespace gear2d;
 #include <iostream>
 #include <limits>
 
-class kinetic2d
-    : public component::base {
+class sigparser {
+  private:
+    object::signature & sig;
+    component::base & com;
+
+  public:
+    sigparser(object::signature & sig, component::base * com)
+      : sig(sig)
+      , com(*com)
+    { }
+
+    template <typename datatype>
+    link<datatype> init(std::string pid, const datatype & def = datatype()) {
+      return com.fetch<datatype>(pid, eval<datatype>(sig[pid], def));
+    }
+
+    link<std::string> init(std::string pid, std::string def = std::string("")) {
+      auto it = sig.find(pid);
+      if (it != sig.end()) def = it->second;
+      return com.fetch<std::string>(pid, def);
+    }
+};
+
+class kinetic2d : public component::base {
+  private:
+    template<typename T>
+    struct linkvec {
+      link<T> x;
+      link<T> y;
+    };
+    
+    linkvec<float> speed;
+    linkvec<float> speedmin;
+    linkvec<float> speedmax;
+    linkvec<float> accel;
+    linkvec<float> accelmin;
+    linkvec<float> accelmax;
+    linkvec<float> pos;
+    
   public:
     kinetic2d() {
     };
@@ -53,50 +90,39 @@ class kinetic2d
     virtual std::string depends() { return "spatial/space2d"; }
     
     virtual void setup(object::signature & sig) {
-      init<float>("x.speed", sig["x.speed"], 0);
-      init<float>("x.speed.max", sig["x.speed.max"], std::numeric_limits<float>::infinity());
-      init<float>("x.speed.min", sig["x.speed.min"], -read<float>("x.speed.max"));
-      init<float>("y.speed", sig["y.speed"], 0);
-      init<float>("y.speed.max", sig["y.speed.max"], std::numeric_limits<float>::infinity());
-      init<float>("y.speed.min", sig["y.speed.min"], -read<float>("y.speed.max"));
+      sigparser s(sig, this);
+      speed.x = s.init("x.speed", 0.0f);
+      speedmax.x = s.init("x.speed.max", std::numeric_limits<float>::infinity());
+      speedmin.x = s.init("x.speed.min", speedmax.x * -1.0f);
+      speed.y = s.init("y.speed", 0.0f);
+      speedmax.y = s.init("y.speed.max", std::numeric_limits<float>::infinity());
+      speedmin.y = s.init("y.speed.min", speedmax.y * -1.0f);
+
+      accel.x = s.init("x.accel", 0.0f);
+      accelmax.x = s.init("x.accel.max", std::numeric_limits<float>::infinity());
+      accelmin.x = s.init("x.accel.min", accelmax.x * -1.0f);
+      accel.y = s.init("y.accel", 0.0f);
+      accelmax.y = s.init("y.accel.max", std::numeric_limits<float>::infinity());
+      accelmin.y = s.init("y.accel.min", accelmax.y * -1.0f);
       
-      init<float>("x.accel", sig["x.accel"], 0);
-      init<float>("x.accel.max", sig["x.accel.max"], std::numeric_limits<float>::infinity());
-      init<float>("x.accel.min", sig["x.accel.min"], -read<float>("x.accel.max"));
-      
-      init<float>("y.accel", sig["y.accel"], 0);
-      init<float>("y.accel.max", sig["y.accel.max"], std::numeric_limits<float>::infinity());
-      init<float>("y.accel.min", sig["y.accel.min"], -read<float>("y.accel.max"));      
+      pos.x = fetch<float>("x");
+      pos.y = fetch<float>("y");
     }
+    
     virtual void update(timediff dt) {
       modinfo("kinematic2d");
-      float xaccel, yaccel, xspeed, yspeed;
-      
-      /* read actual values */
-      read<float>("x.accel", xaccel); read<float>("y.accel", yaccel);
-      read<float>("x.speed", xspeed); read<float>("y.speed", yspeed);
-      clamp(xaccel, read<float>("x.accel.min"), read<float>("x.accel.max"));
-      clamp(yaccel, read<float>("y.accel.min"), read<float>("y.accel.max"));
+      clamp(accel.x, accelmin.x, accelmax.x);
+      clamp(accel.y, accelmin.y, accelmax.y);
 
-      /* update clamped acceleration */
-      write<float>("x.accel", xaccel);
-      write<float>("y.accel", yaccel);
-      
-      add("x", xspeed * dt);
-      add("y", yspeed * dt);
+      pos.x += speed.x * dt;
+      pos.y += speed.y * dt;
 
-      /* use rk4 to update position */
-      // add("x", xspeed * dt + xaccel * dt * dt * .5);
-      // add("y", yspeed * dt + yaccel * dt * dt * .5);
-      trace("Yeah! Updating x and y: ", read<float>("x"), read<float>("y"));
-      
       /* update speed */
-      xspeed += xaccel * dt;
-      yspeed += yaccel * dt;
-      clamp(xspeed, read<float>("x.speed.min"), read<float>("x.speed.max"));
-      clamp(yspeed, read<float>("y.speed.min"), read<float>("y.speed.max"));
-      write("x.speed", xspeed);
-      write("y.speed", yspeed);
+      speed.x += accel.x *dt;
+      speed.y += accel.y *dt;
+      clamp(speed.x, speedmin.x, speedmax.x);
+      clamp(speed.y, speedmin.y, speedmax.y);
+      trace(speed.x, accel.x, speed.y, accel.y, owner->name());
     }
 };
 

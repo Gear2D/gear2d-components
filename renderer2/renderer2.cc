@@ -44,6 +44,7 @@ void renderer2::destroyed() {
     trace("Removing", tp->id, "from renderer order. this =", this, "Result:", e);
     delete tp;
   }
+  renderbase::remove(this);
 }
 
 renderer2::~renderer2() { 
@@ -117,7 +118,9 @@ void renderer2::setup(object::signature & s) {
 }
 
 void renderer2::update(timediff dt) {
-  renderbase::update();
+  modinfo("renderer2");
+  auto total = renderbase::update();
+  if (total) trace("Rendered", total, "surfaces");
 }
 
 g2dcomponent(renderer2)

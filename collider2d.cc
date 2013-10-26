@@ -200,6 +200,8 @@ class collider : public component::base {
     }
     
     static void calculate() {
+      modinfo("collider2d");
+      int aha = 0;
       if (colliders.size() <= 1) return;
       for (std::set<collider *>::iterator i = colliders.begin(); i != colliders.end(); i++) {
         
@@ -208,6 +210,7 @@ class collider : public component::base {
         std::set<collider *>::iterator j = i;
         j++;
         for (; j != colliders.end(); j++) {
+          aha++;
           collider * second = *j;
           //const string & ftype = first->raw<string>("collider.type");
           //const string & stype = second->raw<string>("collider.type");
@@ -298,6 +301,7 @@ class collider : public component::base {
           }
         }
       }
+      trace("I have iterated", aha, "colliders");
     }
     static bool testaabb(rect & a, rect & b) {
       return (

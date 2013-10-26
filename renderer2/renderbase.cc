@@ -141,6 +141,7 @@ int renderbase::render() {
     total++;
   }
 
+  showfps = true;
   if (showfps) {
     SDL_Rect src = {0, 0, 5, 6};
     SDL_Rect dst = {0, 0, 5, 6};

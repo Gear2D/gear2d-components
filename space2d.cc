@@ -94,9 +94,10 @@ class spatial : public component::base {
         cz = z + (d/2);
       else if (cz != 0.0f)
         z = cz - (d/2);
-      
+#if 0
       hook("x"); hook("y"); hook("z"); hook("w"); hook("h"); hook("d");
       hook("cx"); hook("cy"); hook("cz");
+#endif
     }      
     
     virtual void update(timediff dt) {

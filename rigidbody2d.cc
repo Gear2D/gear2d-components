@@ -74,8 +74,8 @@ class bounce : public component::base {
 //         
 //         
         
-        add<float>("y", -yspeed * dt);
-        add<float>("x", -xspeed * dt);
+        //add<float>("y", -yspeed * dt);
+        //add<float>("x", -xspeed * dt);
         
         // adjust x and y to non-colliding positions
         float resxspeed, resyspeed;
