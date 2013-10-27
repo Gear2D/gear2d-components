@@ -104,4 +104,4 @@ class spatial : public component::base {
     }
 };
 
-g2dcomponent(spatial);
+g2dcomponent(spatial, spatial, space2d);

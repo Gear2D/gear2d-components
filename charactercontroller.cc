@@ -136,4 +136,4 @@ class charactercontroller : public component::base {
     }
 };
 
-g2dcomponent(charactercontroller);
+g2dcomponent(charactercontroller, controller, charactercontroller);

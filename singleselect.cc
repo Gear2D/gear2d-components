@@ -195,5 +195,5 @@ class singleselect: public component::base {
     }
 };
 
-g2dcomponent(singleselect);
+g2dcomponent(singleselect, menu, singleselect);
 

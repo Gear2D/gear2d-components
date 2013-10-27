@@ -37,4 +37,4 @@ class mouseover : public gear2d::component::base {
     }
 };
 
-g2dcomponent(mouseover);
+g2dcomponent(mouseover, mouseover, mouseover);

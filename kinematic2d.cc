@@ -126,4 +126,4 @@ class kinetic2d : public component::base {
     }
 };
 
-g2dcomponent(kinetic2d)
+g2dcomponent(kinetic2d, kinematics, kinematic2d)

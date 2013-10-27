@@ -201,7 +201,6 @@ class collider : public component::base {
     
     static void calculate() {
       modinfo("collider2d");
-      int aha = 0;
       if (colliders.size() <= 1) return;
       for (std::set<collider *>::iterator i = colliders.begin(); i != colliders.end(); i++) {
         
@@ -210,10 +209,14 @@ class collider : public component::base {
         std::set<collider *>::iterator j = i;
         j++;
         for (; j != colliders.end(); j++) {
-          aha++;
           collider * second = *j;
           //const string & ftype = first->raw<string>("collider.type");
           //const string & stype = second->raw<string>("collider.type");
+          
+          // ignopr
+          if ((((string)second->ignore).find(first->tag) != string::npos) && (((string)first->ignore).find(second->tag) != string::npos)) {
+            continue;
+          }
 
           const bool & fbind = first->binded;
           //const bool & fbind = first->raw<bool>("collider.bind");
@@ -236,7 +239,7 @@ class collider : public component::base {
           
           if (testaabb(faabb, saabb)) {
             modinfo("collider2d");
-            trace(first->owner->name(), "collides with",  second->owner->name());
+            
             // calculates intersection
             rect inter;
             inter.x = max(faabb.x, saabb.x);
@@ -245,51 +248,56 @@ class collider : public component::base {
             inter.h = min(faabb.y + faabb.h, saabb.y + saabb.h) - max(faabb.y, saabb.y);
             
             
+            
             int fc, sc;
             
             // when h bigger than w, side collision first
             if (inter.h > inter.w) {
-              // test if intercep.x = first x, if so, first collision left
-              if (inter.x == faabb.x) { fc = 2; sc = 0; }
+              if (inter.x > faabb.x) { fc = 2; sc = 0; }
               else { fc = 0; sc = 2; }
             } else {
-              if (inter.y == faabb.y) { fc = 1; sc = 3; }
+              if (inter.y > faabb.y) { fc = 1; sc = 3; }
               else { fc = 3; sc = 1; }
             }
             
-            first->collision.ix = inter.x;
-            first->collision.iy = inter.y;
-            first->collision.iw = inter.w;
-            first->collision.ih = inter.h;
-            //first->write<float>("collider.collision.x", inter.x);
-            //first->write<float>("collider.collision.y", inter.y);
-            //first->write<float>("collider.collision.w", inter.w);
-            //first->write<float>("collider.collision.h", inter.h);
+            trace(first->owner->name(), fc, "collides with", second->owner->name(), sc, faabb.x, "-", inter.x, faabb.y, "-", inter.y, inter.w, inter.h);
+            if (((string)first->ignore).find(second->tag) == string::npos) {
+              first->collision.ix = inter.x;
+              first->collision.iy = inter.y;
+              first->collision.iw = inter.w;
+              first->collision.ih = inter.h;
+              //first->write<float>("collider.collision.x", inter.x);
+              //first->write<float>("collider.collision.y", inter.y);
+              //first->write<float>("collider.collision.w", inter.w);
+              //first->write<float>("collider.collision.h", inter.h);
 
-            first->collision.side = fc;
-            //first->write<int>("collider.collision.side", fc);
+              first->collision.side = fc;
+              //first->write<int>("collider.collision.side", fc);
 
-            first->collision.speedx = second->kinematics.speedx;
-            first->collision.speedy = second->kinematics.speedy;
-            //first->write<float>("collider.collision.speed.x", second->read<float>("x.speed"));
-            //first->write<float>("collider.collision.speed.y", second->read<float>("y.speed"));
+              first->collision.speedx = second->kinematics.speedx;
+              first->collision.speedy = second->kinematics.speedy;
+              //first->write<float>("collider.collision.speed.x", second->read<float>("x.speed"));
+              //first->write<float>("collider.collision.speed.y", second->read<float>("y.speed"));
+            }
             
-            second->collision.ix = inter.x;
-            second->collision.iy = inter.y;
-            second->collision.iw = inter.w;
-            second->collision.ih = inter.h;
-            //second->write<float>("collider.collision.x", inter.x);
-            //second->write<float>("collider.collision.y", inter.y);
-            //second->write<float>("collider.collision.w", inter.w);
-            //second->write<float>("collider.collision.h", inter.h);
+            if (((string)second->ignore).find(first->tag) == string::npos) {
+              second->collision.ix = inter.x;
+              second->collision.iy = inter.y;
+              second->collision.iw = inter.w;
+              second->collision.ih = inter.h;
+              //second->write<float>("collider.collision.x", inter.x);
+              //second->write<float>("collider.collision.y", inter.y);
+              //second->write<float>("collider.collision.w", inter.w);
+              //second->write<float>("collider.collision.h", inter.h);
 
-            second->collision.side = sc;
-            //second->write<int>("collider.collision.side", sc);
+              second->collision.side = sc;
+              //second->write<int>("collider.collision.side", sc);
 
-            second->collision.speedx = first->kinematics.speedx;
-            second->collision.speedy = first->kinematics.speedy;
-            //second->write<float>("collider.collision.speed.x", first->read<float>("x.speed"));
-            //second->write<float>("collider.collision.speed.y", first->read<float>("y.speed"));
+              second->collision.speedx = first->kinematics.speedx;
+              second->collision.speedy = first->kinematics.speedy;
+              //second->write<float>("collider.collision.speed.x", first->read<float>("x.speed"));
+              //second->write<float>("collider.collision.speed.y", first->read<float>("y.speed"));
+            }
             
             if (((string)first->ignore).find(second->tag) == string::npos) {
               first->collision.collisor = second;
@@ -301,7 +309,6 @@ class collider : public component::base {
           }
         }
       }
-      trace("I have iterated", aha, "colliders");
     }
     static bool testaabb(rect & a, rect & b) {
       return (
@@ -320,4 +327,4 @@ class collider : public component::base {
 int collider::voteforupdate = 0;
 std::set<collider*> collider::colliders;
 
-g2dcomponent(collider);
+g2dcomponent(collider, collider, collider2d);

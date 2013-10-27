@@ -95,4 +95,4 @@ int mouse::bt2 = 0;
 int mouse::bt3 = 0;
 bool mouse::initialized = false;
 
-g2dcomponent(mouse);
+g2dcomponent(mouse, mouse, mouse);

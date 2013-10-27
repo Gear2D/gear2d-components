@@ -103,16 +103,14 @@ int renderbase::update() {
 
 int renderbase::render() {
   int total = 0;
-  modinfo("renderbase");
-
   static int timemark = 0;
   static float dt = 0;
   dt = dt*0.75f + 0.25f*(SDL_GetTicks() - timemark);
   timemark = SDL_GetTicks();
 
 
-  SDL_SetRenderDrawColor(sdlrenderer, 0xdc, 0x9c, 0x76, 255);
-  SDL_RenderClear(sdlrenderer);
+  //SDL_SetRenderDrawColor(sdlrenderer, 0xdc, 0x9c, 0x76, 255);
+  //SDL_RenderClear(sdlrenderer);
   
   for (zorder zpair : renderorder) {
     texture & t = *(zpair.second);
@@ -136,7 +134,6 @@ int renderbase::render() {
     int alpha = t.alpha * 255;
     SDL_SetTextureBlendMode(t.raw, SDL_BLENDMODE_BLEND);
     SDL_SetTextureAlphaMod(t.raw, alpha);
-    trace(t.id, "clip:", src.x, src.y, dest.w, dest.h);
     SDL_RenderCopyEx(sdlrenderer, t.raw, &src, &dest, t.rotation, NULL, SDL_FLIP_NONE);
     total++;
   }

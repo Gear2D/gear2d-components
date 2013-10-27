@@ -57,6 +57,7 @@ link_directories(${Gear2D_LINK_DIR})
 
 install(TARGETS space2d
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/spatial
+		ARCHIVE DESTINATION ${COMPONENT_INSTALL_DIR}/spatial
 )
 
 install(TARGETS kinematic2d

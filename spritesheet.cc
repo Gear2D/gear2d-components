@@ -236,4 +236,4 @@ class spritesheet : public component::base {
     }
 };
 
-g2dcomponent(spritesheet);
+g2dcomponent(spritesheet, animation, spritesheet);

@@ -242,4 +242,4 @@ std::set<SDL_Scancode> keyboard::usedkeys;
 std::map<SDL_Scancode, keyboard::keystatus> keyboard::keys;
 set<keyboard *> keyboard::kbcomponents;
 
-g2dcomponent(keyboard);
+g2dcomponent(keyboard, keyboard, keyboard);

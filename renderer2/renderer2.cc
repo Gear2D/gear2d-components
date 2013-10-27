@@ -118,9 +118,7 @@ void renderer2::setup(object::signature & s) {
 }
 
 void renderer2::update(timediff dt) {
-  modinfo("renderer2");
   auto total = renderbase::update();
-  if (total) trace("Rendered", total, "surfaces");
 }
 
-g2dcomponent(renderer2)
+g2dcomponent(renderer2, renderer, renderer2)

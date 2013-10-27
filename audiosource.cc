@@ -243,4 +243,4 @@ string audiosource::muspath;
 map<string, Mix_Music *> audiosource::musics;
 map<string, Mix_Chunk *> audiosource::rawbyfile;
 
-g2dcomponent(audiosource);
+g2dcomponent(audiosource, audiosource, audiosource);
