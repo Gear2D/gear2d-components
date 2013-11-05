@@ -38,67 +38,23 @@ find_package(SDL2_mixer REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(Gear2D REQUIRED)
 
-add_library(space2d MODULE space2d.cc)
-add_library(kinematic2d MODULE kinematic2d.cc)
-add_library(keyboard MODULE keyboard.cc)
-add_library(mouse MODULE mouse.cc)
-add_library(mouseover MODULE mouseover.cc)
-add_library(charactercontroller MODULE charactercontroller.cc)
-add_library(collider2d MODULE collider2d.cc)
-add_library(rigidbody2d MODULE rigidbody2d.cc)
-add_library(audiosource MODULE audiosource.cc)
-add_library(singleselect MODULE singleselect.cc)
-add_library(spritesheet MODULE spritesheet.cc)
 
 set(COMPONENT_INSTALL_DIR lib/gear2d/component)
 
 include_directories(${Gear2D_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
 link_directories(${Gear2D_LINK_DIR})
 
-install(TARGETS space2d
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/spatial
-		ARCHIVE DESTINATION ${COMPONENT_INSTALL_DIR}/spatial
-)
-
-install(TARGETS kinematic2d
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/kinematics
-)
-
-install(TARGETS keyboard
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/keyboard
-)
-
-install(TARGETS mouse
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/mouse
-)
-
-install(TARGETS mouseover
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/mouseover
-)
-
-install(TARGETS charactercontroller
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/controller
-)
-
-install(TARGETS collider2d
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/collider
-)
-
-install(TARGETS rigidbody2d
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/dynamics
-)
-
-install(TARGETS audiosource
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/audiosource
-)
-
-install(TARGETS singleselect
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/menu
-)
-
-install(TARGETS spritesheet
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/animation
-)
+gear2d_component(spatial space2d space2d.cc)
+gear2d_component(kinematics kinematic2d kinematic2d.cc)
+gear2d_component(keyboard keyboard keyboard.cc)
+gear2d_component(mouse mouse mouse.cc)
+gear2d_component(mouseover mouseover mouseover.cc)
+gear2d_component(controller charactercontroller charactercontroller.cc)
+gear2d_component(collider collider2d collider2d.cc)
+gear2d_component(dynamics rigidbody2d rigidbody2d.cc)
+gear2d_component(audiosource audiosource audiosource.cc)
+gear2d_component(menu singleselect singleselect.cc)
+gear2d_component(animation spritesheet spritesheet.cc)
 
 if(WIN32)
 	get_filename_component(SDL2_MIXER_LIBRARY_DIR ${SDL2_MIXER_LIBRARY} PATH)
@@ -123,18 +79,9 @@ if(WIN32)
 	endif(MINGW)
 endif (WIN32)
 
-target_link_libraries(mouseover ${Gear2D_LIBRARY})
 target_link_libraries(keyboard ${SDL2_LIBRARY} ${Gear2D_LIBRARY})
 target_link_libraries(mouse ${SDL2_LIBRARY} ${Gear2D_LIBRARY})
-target_link_libraries(audiosource ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY} ${Gear2D_LIBRARY})
-target_link_libraries(space2d ${Gear2D_LIBRARY})
-target_link_libraries(kinematic2d ${Gear2D_LIBRARY})
-target_link_libraries(charactercontroller ${Gear2D_LIBRARY})
-target_link_libraries(collider2d ${Gear2D_LIBRARY})
-target_link_libraries(rigidbody2d ${Gear2D_LIBRARY})
-target_link_libraries(singleselect ${Gear2D_LIBRARY})
-target_link_libraries(spritesheet ${Gear2D_LIBRARY})
-#add_subdirectory(renderer)
+target_link_libraries(audiosource ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
 add_subdirectory(renderer2)
 
 add_subdirectory(doc)
