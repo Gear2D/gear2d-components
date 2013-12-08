@@ -80,7 +80,7 @@ SDL_Texture * renderbase::load(const string & filename) {
   if (i == rawtextures.end()) {                             // texture not there.
     tex = IMG_LoadTexture(sdlrenderer, filepath.c_str());
     if (tex == nullptr) {
-      trace("Could not load texture", filepath, ":", SDL_GetError(), log::error);
+      trace("Could not load texture", filepath, ":", SDL_GetError());
       // Let it go on.
     }
   }
@@ -145,7 +145,9 @@ int renderbase::render() {
   if (showfps) {
     SDL_Rect src = {0, 0, 5, 6};
     SDL_Rect dst = {0, 0, 5, 6};
-    string stringdt = std::to_string((int)dt);
+    char buf[4];
+    sprintf(buf, "%.4d", (int)dt);
+    string stringdt = buf;
 
     for (char c : stringdt) {
       src.x = (c - '0') * 5;
@@ -162,9 +164,8 @@ int renderbase::render() {
 void renderbase::initialize(int width,  int height, bool fullscreen,const std::string & filepath) {
   moderr("render2");
   int flags = 0;
-  if (fullscreen) flags |= SDL_WINDOW_FULLSCREEN;
+  if (fullscreen) flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
   error = 0;
-  trace("Initializing renderer2 width =", width, "height =", height, "fullscreen =", fullscreen, log::info);
   if (!SDL_WasInit(SDL_INIT_EVERYTHING)) {
     trace("SDL was not initialized at all. Initializing SDL.");
     error = SDL_Init(SDL_INIT_VIDEO) != 0;
@@ -179,14 +180,42 @@ void renderbase::initialize(int width,  int height, bool fullscreen,const std::s
       return;
     }
   }
+  
+  /* 
+ 98         SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
+ 99         
+100         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+101         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+102         SDL_RenderSetLogicalSize(renderer, SCREEN_W, SCREEN_H);
+
+ */
+
+  SDL_DisplayMode displaymode;
+  SDL_GetCurrentDisplayMode(0, &displaymode);
+
+  /* the value passed in width and height defines the logical size, 
+   * so we use it to define logical size later  */
+  screenwidth = width == 0 ? displaymode.w : width;
+  screenheight = height == 0 ? displaymode.h : height;
+
+  if (width == 0 || fullscreen) {
+    width = displaymode.w;
+  }
+  if (height == 0 || fullscreen) {
+    height = displaymode.h;
+  }
+  trace("Initializing renderer2 width =", width, screenwidth, "height =", height, screenheight, "fullscreen =", fullscreen);
   error = SDL_CreateWindowAndRenderer(width, height, flags, &sdlwindow, &sdlrenderer) != 0;
   if (error) {
     trace("Could not create window or renderer:", SDL_GetError());
     return;
   }
   
-  screenwidth = width;
-  screenheight = height;
+  SDL_SetRenderDrawColor(sdlrenderer, 0, 0, 0, 0);
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+  SDL_RenderSetLogicalSize(sdlrenderer, screenwidth, screenheight);
+  
+
   
   imgpath = filepath;
   trim(imgpath);

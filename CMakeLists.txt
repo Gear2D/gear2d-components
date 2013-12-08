@@ -32,57 +32,49 @@ add_definitions(-std=c++11)
 # We do not want SDLMain
 set(SDL2_BUILDING_LIBRARY 1)
 
-find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
-find_package(SDL2_mixer REQUIRED)
-find_package(SDL2_ttf REQUIRED)
 find_package(Gear2D REQUIRED)
-
 
 set(COMPONENT_INSTALL_DIR lib/gear2d/component)
 
 include_directories(${Gear2D_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
 link_directories(${Gear2D_LINK_DIR})
 
-gear2d_component(spatial space2d space2d.cc)
-gear2d_component(kinematics kinematic2d kinematic2d.cc)
-gear2d_component(keyboard keyboard keyboard.cc)
-gear2d_component(mouse mouse mouse.cc)
-gear2d_component(mouseover mouseover mouseover.cc)
-gear2d_component(controller charactercontroller charactercontroller.cc)
-gear2d_component(collider collider2d collider2d.cc)
-gear2d_component(dynamics rigidbody2d rigidbody2d.cc)
-gear2d_component(audiosource audiosource audiosource.cc)
-gear2d_component(menu singleselect singleselect.cc)
-gear2d_component(animation spritesheet spritesheet.cc)
-
 if(WIN32)
-	get_filename_component(SDL2_MIXER_LIBRARY_DIR ${SDL2_MIXER_LIBRARY} PATH)
-	set(SDL2_MIXER_DLLS
-		"${SDL2_MIXER_LIBRARY_DIR}/SDL2_mixer.dll"
-#		"${SDL2_MIXER_LIBRARY_DIR}/smpeg.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libvorbisfile-3.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libvorbis-0.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libogg-0.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libmikmod-2.dll"
-		"${SDL2_MIXER_LIBRARY_DIR}/libFLAC-8.dll"
-	)
-	message(STATUS "Packaging SDL2_mixer DLLs: ${SDL2_MIXER_DLLS}")
-	install(FILES ${SDL2_MIXER_DLLS}
-		DESTINATION bin
-	)
-	if(MINGW)
-		message(STATUS "Compiling with MINGW!")
-		set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static -lpthread -dynamic")
-		set(CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc -static -lpthread -dynamic")
-		set(CMAKE_MODULE_LINKER_FLAGS "-static-libstdc++ -static-libgcc -static -lpthread -dynamic")
-	endif(MINGW)
+  get_filename_component(SDL2_MIXER_LIBRARY_DIR ${SDL2_MIXER_LIBRARY} PATH)
+  set(SDL2_MIXER_DLLS
+    "${SDL2_MIXER_LIBRARY_DIR}/SDL2_mixer.dll"
+    "${SDL2_MIXER_LIBRARY_DIR}/libvorbisfile-3.dll"
+    "${SDL2_MIXER_LIBRARY_DIR}/libvorbis-0.dll"
+    "${SDL2_MIXER_LIBRARY_DIR}/libogg-0.dll"
+    "${SDL2_MIXER_LIBRARY_DIR}/libmikmod-2.dll"
+    "${SDL2_MIXER_LIBRARY_DIR}/libFLAC-8.dll"
+  )
+  message(STATUS "Packaging SDL2_mixer DLLs: ${SDL2_MIXER_DLLS}")
+  install(FILES ${SDL2_MIXER_DLLS}
+          DESTINATION bin
+  )
+  if(MINGW)
+    message(STATUS "Compiling with MINGW!")
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static -lpthread -dynamic")
+    set(CMAKE_SHARED_LINKER_FLAGS "-static-libstdc++ -static-libgcc -static -lpthread -dynamic")
+    set(CMAKE_MODULE_LINKER_FLAGS "-static-libstdc++ -static-libgcc -static -lpthread -dynamic")
+  endif(MINGW)
 endif (WIN32)
 
-target_link_libraries(keyboard ${SDL2_LIBRARY} ${Gear2D_LIBRARY})
-target_link_libraries(mouse ${SDL2_LIBRARY} ${Gear2D_LIBRARY})
-target_link_libraries(audiosource ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
+# All component subdirs
+add_subdirectory(audiosource)
+add_subdirectory(charactercontroller)
+add_subdirectory(collider2d)
+add_subdirectory(keyboard)
+add_subdirectory(kinematic2d)
+add_subdirectory(mouse)
+add_subdirectory(mouseover)
+#add_subdirectory(renderer)
 add_subdirectory(renderer2)
+add_subdirectory(rigidbody2d)
+add_subdirectory(singleselect)
+add_subdirectory(space2d)
+add_subdirectory(spritesheet)
 
 add_subdirectory(doc)
 if (WIN32)

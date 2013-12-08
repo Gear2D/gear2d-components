@@ -20,8 +20,8 @@ class renderer2 : public component::base {
     virtual void destroyed();
     
   private:
-    link<std::string> surfacelist;
-    link<std::string> textlist;
+    gear2d::link<std::string> surfacelist;
+    gear2d::link<std::string> textlist;
     std::map<std::string, texture *> textures;
 };
 

@@ -36,14 +36,18 @@ void renderer2::setup(object::signature & s) {
   modinfo("renderer2");
   sigparser sig(s, this);
   int screenwidth; int screenheight;
-  screenwidth = sig.init("renderer.w", 640);
-  screenheight = sig.init("renderer.h", 480);
+  screenwidth = sig.init("renderer.w", 0);
+  screenheight = sig.init("renderer.h", 0);
   
   if (!renderbase::initialized) {
     bool fullscreen;
-    fullscreen = eval<int>(s["renderer.fullscreen"], 0) == 1;
+    fullscreen = eval<bool>(s["renderer.fullscreen"], false) == true;
     renderbase::initialize(screenwidth, screenheight, fullscreen, s["imgpath"]);
   }
+  
+  // write corrected w/h
+  write("renderer.w", renderbase::screenwidth);
+  write("renderer.h", renderbase::screenheight);
 
   renderbase::add(this);
   

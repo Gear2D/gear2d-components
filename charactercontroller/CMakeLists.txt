@@ -1,0 +1,2 @@
+find_package(Gear2D REQUIRED)
+gear2d_component(controller charactercontroller charactercontroller.cc)

@@ -15,22 +15,22 @@ struct texture {
 
     std::string id;
     SDL_Texture * raw;                                      // raw texture to render
-    link<float> x, y, z;                                    // this texture position
-    link<int> w, h;                                         // texture size
-    link<int> bind;
-    link<float> objx, objy, objz;
-    link<float> rotation;
-    link<float> alpha;
+    gear2d::link<float> x, y, z;                                    // this texture position
+    gear2d::link<int> w, h;                                         // texture size
+    gear2d::link<int> bind;
+    gear2d::link<float> objx, objy, objz;
+    gear2d::link<float> rotation;
+    gear2d::link<float> alpha;
     struct {
-      link<int> x;
-      link<int> y;
-      link<int> w;
-      link<int> h;
+      gear2d::link<int> x;
+      gear2d::link<int> y;
+      gear2d::link<int> w;
+      gear2d::link<int> h;
     } clip;
     
     bool bindclipw;
     bool bindcliph;
-    link<bool> render;
+    gear2d::link<bool> render;
 };
 
 #endif

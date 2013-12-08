@@ -18,7 +18,7 @@ typedef pair<int, texture*> zorder;
 
 class renderbase {
   public:
-    static void initialize(int width = 640, int height = 480, bool fullscreen = false, const string & filepath = "");
+    static void initialize(int width = 0, int height = 0, bool fullscreen = false, const string & filepath = "");
     static SDL_Texture * load(const string & filename);
     static int querywidth(SDL_Texture * texture);
     static int queryheight(SDL_Texture * texture);

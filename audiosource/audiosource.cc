@@ -176,6 +176,8 @@ class audiosource : public gear2d::component::base {
     }
     
     void loadsounds(string soundlist) {
+      modinfo("audiosource");
+      trace("Loading sounds:", soundlist);
       if (soundlist == "") return;
       set<string> sounds;
       split(sounds, soundlist, ' ');
@@ -220,6 +222,8 @@ class audiosource : public gear2d::component::base {
     }
     
     static void playmusic(string musicfn, int loops) {
+      modinfo("audiosource");
+      trace("playing music", musicfn);
       Mix_Music * m = loadmusic(muspath + musicfn);
       if (m == 0) return;
       if (Mix_PlayingMusic() == 1) {
