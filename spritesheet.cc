@@ -107,19 +107,19 @@ class spritesheet : public component::base {
       }
       
       // update spriew and spriteh in case it changes
-      if ((p = pid.find(".position.w")) != string::npos && p != -1) {
+      if ((p = pid.find(".w")) != string::npos && p != -1) {
         string id = pid.substr(0, p);
         animation * a = anims[id];
         if (a != 0) {
-          a->spritew = read<int>(id + ".position.w");
+          a->spritew = read<int>(id + ".w");
         }
         return;
       }
-      if ((p = pid.find(".position.h")) != string::npos && p != -1) {
+      if ((p = pid.find(".h")) != string::npos && p != -1) {
         string id = pid.substr(0, p);
         animation * a = anims[id];
         if (a != 0) {
-          a->spriteh = read<int>(id + ".position.h");
+          a->spriteh = read<int>(id + ".h");
         }
         return;
       }
@@ -148,6 +148,7 @@ class spritesheet : public component::base {
     virtual void setup(object::signature & sig) {
       modinfo(type());
       string animline = sig["animations"];
+      trace("Loading",  animline);
       set<string> animations;
       if (!animline.empty()) {
         animations = split(animations, animline, ' ');
@@ -161,10 +162,10 @@ class spritesheet : public component::base {
           animation * a = loadanim(id);
           string pid;
           
-          a->spritew = read<int>(id + ".position.w");
-          a->spriteh = read<int>(id + ".position.h");
-          hook(id + ".position.w");
-          hook(id + ".position.h");
+          a->spritew = read<int>(id + ".w");
+          a->spriteh = read<int>(id + ".h");
+          hook(id + ".w");
+          hook(id + ".h");
           
           pid = id + ".animation.frame.size";
           write(pid, eval(sig[pid], a->spritew));

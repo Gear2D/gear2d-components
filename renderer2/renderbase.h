@@ -47,5 +47,7 @@ class renderbase {
     static set<zorder> renderorder;
     static std::string imgpath;
     static bool showfps;
+    static int screenwidth;
+    static int screenheight;
 };
 #endif

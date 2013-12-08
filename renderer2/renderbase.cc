@@ -17,6 +17,8 @@ SDL_Window * renderbase::sdlwindow;
 std::set<renderer2*> renderbase::renderers;
 bool renderbase::showfps = false;
 SDL_Texture * renderbase::numberstex = nullptr;
+int renderbase::screenwidth;
+int renderbase::screenheight;
 
 
 
@@ -114,6 +116,7 @@ int renderbase::render() {
   
   for (zorder zpair : renderorder) {
     texture & t = *(zpair.second);
+    if (!t.render) continue;
     SDL_Rect dest;
     if (!t.bind) {
       dest.x = t.x; dest.y = t.y; dest.w = t.w; dest.h = t.h;
@@ -124,8 +127,8 @@ int renderbase::render() {
     
     SDL_Rect src;
     src.x = t.clip.x; src.y = t.clip.y; src.w = t.clip.w; src.h = t.clip.h;
-    dest.w = src.w;
-    dest.h = src.h;
+    if (t.bindclipw) dest.w = src.w;
+    if (t.bindcliph) dest.h = src.h;
     
     //SDL_Point center;
     //center.x = (dest.x + dest.w)/2.0f;
@@ -181,7 +184,10 @@ void renderbase::initialize(int width,  int height, bool fullscreen,const std::s
     trace("Could not create window or renderer:", SDL_GetError());
     return;
   }
-
+  
+  screenwidth = width;
+  screenheight = height;
+  
   imgpath = filepath;
   trim(imgpath);
   if (!imgpath.empty()) {

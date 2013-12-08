@@ -27,6 +27,10 @@ struct texture {
       link<int> w;
       link<int> h;
     } clip;
+    
+    bool bindclipw;
+    bool bindcliph;
+    link<bool> render;
 };
 
 #endif

@@ -7,30 +7,8 @@
 
 #include <string>
 
+using std::string;
 using namespace gear2d;
-
-class sigparser {
-  private:
-    object::signature & sig;
-    component::base & com;
-
-  public:
-    sigparser(object::signature & sig, component::base * com)
-      : sig(sig)
-      , com(*com)
-    { }
-
-    template <typename datatype>
-    link<datatype> init(std::string pid, const datatype & def = datatype()) {
-      return com.fetch<datatype>(pid, eval<datatype>(sig[pid], def));
-    }
-
-    link<std::string> init(std::string pid, std::string def = std::string("")) {
-      auto it = sig.find(pid);
-      if (it != sig.end()) def = it->second;
-      return com.fetch<std::string>(pid, def);
-    }
-};
 
 renderer2::renderer2() {
 
@@ -52,6 +30,7 @@ renderer2::~renderer2() {
 
 std::string renderer2::family() { return "renderer"; }
 std::string renderer2::type() { return "renderer2"; }
+string renderer2::depends() { return "spatial/space2d"; }
 
 void renderer2::setup(object::signature & s) {
   modinfo("renderer2");
@@ -86,7 +65,7 @@ void renderer2::setup(object::signature & s) {
     /* get id=name */
     string id = surfdef.substr(0,  pos);
     string filename = surfdef.substr(pos+1);
-    size_t s = id.size() + 1;
+    size_t i = id.size() + 1;
     string p(id + ". ");
     
     /* wire texture parameters with links */
@@ -96,11 +75,15 @@ void renderer2::setup(object::signature & s) {
     textures[id] = tp;
     texture & t = *tp;
     t.id = id;
-    p[s] = 'x'; t.x = sig.init(p, .0f);
-    p[s] = 'y'; t.y = sig.init(p, .0f);
-    p[s] = 'z'; t.z = sig.init(p, .0f);
-    p[s] = 'w'; t.w = sig.init(p, renderbase::querywidth(raw));
-    p[s] = 'h'; t.h = sig.init(p, renderbase::queryheight(raw));
+    p[i] = 'x'; t.x = sig.init(p, .0f);
+    p[i] = 'y'; t.y = sig.init(p, .0f);
+    p[i] = 'z'; t.z = sig.init(p, .0f);
+    
+    /* user may explicitly define to stretch w and h */
+    p[i] = 'w'; t.w = sig.init(p, s[p] == "renderer.w" ? renderbase::screenwidth : renderbase::querywidth(raw));
+    if (s[p].empty() || s[p] == "clip.w") t.bindclipw = true;
+    p[i] = 'h'; t.h = sig.init(p, s[p] == "renderer.h" ? renderbase::screenheight : renderbase::queryheight(raw));
+    if (s[p].empty() || s[p] == "clip.h") t.bindcliph = true;
     t.bind = sig.init(id + ".bind", 1);
     t.objx = sig.init("x", .0f);
     t.objy = sig.init("y", .0f);
@@ -112,6 +95,7 @@ void renderer2::setup(object::signature & s) {
     t.clip.y = sig.init(id + ".clip.y", 0);
     t.clip.w = sig.init(id + ".clip.w", renderbase::querywidth(raw));
     t.clip.h = sig.init(id + ".clip.h", renderbase::queryheight(raw));
+    t.render = sig.init(id + ".render", true);
 
     renderbase::renderorder.insert(zorder(t.z, tp));
   }

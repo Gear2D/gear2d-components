@@ -65,19 +65,19 @@ class charactercontroller : public component::base {
       write<int>("controller.vertical", 0);
       write("keyboard.interested", (string) interesting);
     
-      haccel = eval(sig["controller.horizontal.accel"], 2.0f);
+      haccel = eval(sig["controller.horizontal.accel"], 100.0f);
       write("controller.horizontal.accel", haccel);
       hook("controller.horizontal.accel");
       
-      vaccel = eval(sig["controller.vertical.accel"], 2.0f);
+      vaccel = eval(sig["controller.vertical.accel"], 100.0f);
       write("controller.vertical.accel", vaccel);
       hook("controller.vertical.accel");
       
-      hdaccel = eval(sig["controller.horizontal.deaccel"], 2.0f);
+      hdaccel = eval(sig["controller.horizontal.deaccel"], 100.0f);
       write("controller.horizontal.deaccel", hdaccel);
       hook("controller.horizontal.deaccel");
       
-      vdaccel = eval(sig["controller.vertical.deaccel"], 2.0f);
+      vdaccel = eval(sig["controller.vertical.deaccel"], 100.0f);
       write("controller.vertical.deaccel", vdaccel);
       hook("controller.vertical.deaccel");
     }

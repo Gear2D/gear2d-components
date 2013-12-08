@@ -27,29 +27,6 @@ using namespace gear2d;
 #include <string>
 using namespace std;
 
-class sigparser {
-  private:
-    object::signature & sig;
-    component::base & com;
-
-  public:
-    sigparser(object::signature & sig, component::base * com)
-      : sig(sig)
-      , com(*com)
-    { }
-
-    template <typename datatype>
-    link<datatype> init(std::string pid, const datatype & def = datatype()) {
-      return com.fetch<datatype>(pid, eval<datatype>(sig[pid], def));
-    }
-
-    link<std::string> init(std::string pid, std::string def = std::string("")) {
-      auto it = sig.find(pid);
-      if (it != sig.end()) def = it->second;
-      return com.fetch<std::string>(pid, def);
-    }
-};
-
 class collider : public component::base {
   private:
     struct linkrect {
