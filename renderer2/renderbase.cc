@@ -112,7 +112,7 @@ int renderbase::render() {
 
 
   //SDL_SetRenderDrawColor(sdlrenderer, 0xdc, 0x9c, 0x76, 255);
-  //SDL_RenderClear(sdlrenderer);
+  SDL_RenderClear(sdlrenderer);
   
   for (zorder zpair : renderorder) {
     texture & t = *(zpair.second);
@@ -181,15 +181,6 @@ void renderbase::initialize(int width,  int height, bool fullscreen,const std::s
     }
   }
   
-  /* 
- 98         SDL_CreateWindowAndRenderer(0, 0, SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
- 99         
-100         SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-101         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-102         SDL_RenderSetLogicalSize(renderer, SCREEN_W, SCREEN_H);
-
- */
-
   SDL_DisplayMode displaymode;
   SDL_GetCurrentDisplayMode(0, &displaymode);
 
