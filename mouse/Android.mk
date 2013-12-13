@@ -9,9 +9,8 @@ LOCAL_MODULE := $(notdir $(LOCAL_PATH))
 LOCAL_CPPFLAGS := -std=c++11 -fexceptions -DLOGTRACE
 
 LOCAL_SRC_FILES := \
-  $(substr $(LOCAL_PATH),, \
-	$(wildcard $(LOCAL_PATH)/*.cc) \
-	)
+  $(subst $(LOCAL_PATH),, \
+  $(wildcard $(LOCAL_PATH)/*.cc))
 
 LOCAL_STATIC_LIBRARIES := SDL2_static gear2d_static
 
