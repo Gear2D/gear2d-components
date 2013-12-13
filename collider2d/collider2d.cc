@@ -30,10 +30,10 @@ using namespace std;
 class collider : public component::base {
   private:
     struct linkrect {
-      link<float> x;
-      link<float> y;
-      link<float> w;
-      link<float> h;
+      gear2d::link<float> x;
+      gear2d::link<float> y;
+      gear2d::link<float> w;
+      gear2d::link<float> h;
     };
 
     /*
@@ -50,18 +50,18 @@ class collider : public component::base {
       */
     struct collisioninfo {
       /* information about the collisor */
-      link<component::base *> collisor;
-      link<float> speedx;
-      link<float> speedy;
+      gear2d::link<component::base *> collisor;
+      gear2d::link<float> speedx;
+      gear2d::link<float> speedy;
 
       /* side of the collision, relative to this object */
-      link<int> side;
+      gear2d::link<int> side;
 
       /* intersection coordinates */
-      link<float> ix;
-      link<float> iy;
-      link<float> iw;
-      link<float> ih;
+      gear2d::link<float> ix;
+      gear2d::link<float> iy;
+      gear2d::link<float> iw;
+      gear2d::link<float> ih;
     };
 
     struct rect {
@@ -74,24 +74,24 @@ class collider : public component::base {
     /* spatial stuff. we store z and d because
      * we may want to consider them for collisions */
     struct {
-      link<float> x;
-      link<float> y;
-      link<float> z;
-      link<float> w;
-      link<float> h;
-      link<float> d;
+      gear2d::link<float> x;
+      gear2d::link<float> y;
+      gear2d::link<float> z;
+      gear2d::link<float> w;
+      gear2d::link<float> h;
+      gear2d::link<float> d;
     } spatial;
 
     struct {
-      link<float> speedx;
-      link<float> speedy;
+      gear2d::link<float> speedx;
+      gear2d::link<float> speedy;
     } kinematics;
 
     
-    link<string> tag;
-    link<string> ignore;
-    link<bool> binded;
-    link<std::string> coltype;
+    gear2d::link<string> tag;
+    gear2d::link<string> ignore;
+    gear2d::link<bool> binded;
+    gear2d::link<std::string> coltype;
     
   public:
     virtual ~collider() { colliders.erase(this); }

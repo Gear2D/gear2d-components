@@ -45,8 +45,8 @@ class kinetic2d : public component::base {
   private:
     template<typename T>
     struct linkvec {
-      link<T> x;
-      link<T> y;
+      gear2d::link<T> x;
+      gear2d::link<T> y;
     };
     
     linkvec<float> speed;
