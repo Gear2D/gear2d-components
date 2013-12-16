@@ -18,11 +18,19 @@ class renderer2 : public component::base {
     virtual void update(timediff dt);
     virtual ~renderer2();
     virtual void destroyed();
+
+  private /* handlers */:
+     void surfaceschanged(std::string pid, gear2d::component::base * lastwrite, gear2d::object * owner);
+     void zchanged(std::string pid, gear2d::component::base * lastwrite, gear2d::object * owner);
+     
+  private:
+    void loadsurfaces(const std::string & surfacelist);
     
   private:
     gear2d::link<std::string> surfacelist;
     gear2d::link<std::string> textlist;
     std::map<std::string, texture *> textures;
+    sigparser sig;
 };
 
 #endif

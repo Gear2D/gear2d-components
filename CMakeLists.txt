@@ -7,10 +7,6 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif (NOT CMAKE_BUILD_TYPE)
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-  add_definitions(-DLOGTRACE)
-endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
-
 include(GetGitRevisionDescription)
 
 git_describe(Gear2D_COMPONENT_VERSION --tags)
@@ -26,6 +22,12 @@ endif()
 
 add_definitions(-DGEAR2D_COMPONENT_VERSION="${Gear2D_COMPONENT_VERSION}")
 message(STATUS "Building Gear2D components version ${Gear2D_COMPONENT_VERSION} as ${CMAKE_BUILD_TYPE} mode.")
+
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+  add_definitions(-DLOGTRACE)
+  message(STATUS "Tracing will be enabled fo gear2d-components")
+endif(${CMAKE_BUILD_TYPE} STREQUAL "Debug" OR ${CMAKE_BUILD_TYPE} STREQUAL "RelWithDebInfo")
+
 
 add_definitions(-std=c++11)
       

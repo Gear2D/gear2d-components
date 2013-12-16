@@ -15,8 +15,8 @@ struct texture {
 
     std::string id;
     SDL_Texture * raw;                                      // raw texture to render
-    gear2d::link<float> x, y, z;                                    // this texture position
-    gear2d::link<int> w, h;                                         // texture size
+    gear2d::link<float> x, y, z;                            // this texture position
+    gear2d::link<int> w, h;                                 // texture size
     gear2d::link<int> bind;
     gear2d::link<float> objx, objy, objz;
     gear2d::link<float> rotation;
@@ -30,6 +30,7 @@ struct texture {
     
     bool bindclipw;
     bool bindcliph;
+    int oldz;
     gear2d::link<bool> render;
 };
 

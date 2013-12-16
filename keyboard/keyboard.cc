@@ -147,6 +147,7 @@ class keyboard : public component::base {
       modinfo(type());
       std::set<string> keylist;
       split(keylist, interested, ' ');
+      trace("Interested keys:", interested);
       for (std::set<string>::iterator it = keylist.begin(); it != keylist.end(); it++) {
         // build keyname
         string keyname = *it;

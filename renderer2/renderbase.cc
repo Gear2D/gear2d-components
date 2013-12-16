@@ -83,6 +83,9 @@ SDL_Texture * renderbase::load(const string & filename) {
       trace("Could not load texture", filepath, ":", SDL_GetError());
       // Let it go on.
     }
+    rawtextures[filename] = tex;
+  } else {
+    tex = i->second;
   }
   return tex;
 }
@@ -118,12 +121,9 @@ int renderbase::render() {
     texture & t = *(zpair.second);
     if (!t.render) continue;
     SDL_Rect dest;
-    if (!t.bind) {
-      dest.x = t.x; dest.y = t.y; dest.w = t.w; dest.h = t.h;
-    } else {
-      dest.x = t.objx; dest.y = t.objy; dest.w = t.w; dest.h = t.h;
-      //dest = { t.objx, t.objy, t.w, t.h };
-    }
+    dest.x = t.x; dest.y = t.y; dest.w = t.w; dest.h = t.h;
+    if (t.bind)
+      dest.x += t.objx; dest.y += t.objy; dest.w += t.w; dest.h += t.h;
     
     SDL_Rect src;
     src.x = t.clip.x; src.y = t.clip.y; src.w = t.clip.w; src.h = t.clip.h;
