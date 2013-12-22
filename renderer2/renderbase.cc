@@ -145,7 +145,7 @@ int renderbase::render() {
   if (showfps) {
     SDL_Rect src = {0, 0, 5, 6};
     SDL_Rect dst = {0, 0, 5, 6};
-    char buf[4];
+    char buf[5];
     sprintf(buf, "%.4d", (int)dt);
     string stringdt = buf;
 
