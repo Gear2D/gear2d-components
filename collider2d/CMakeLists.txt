@@ -1,2 +1,2 @@
 find_package(Gear2D REQUIRED)
-gear2d_component(collider collider2d collider2d.cc)
+g2dcomponent(FAMILY collider TYPE collider2d SOURCES collider2d.cc)

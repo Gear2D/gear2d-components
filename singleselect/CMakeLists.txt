@@ -1,2 +1,2 @@
 find_package(Gear2D REQUIRED)
-gear2d_component(menu singleselect singleselect.cc)
+g2dcomponent(FAMILY menu TYPE singleselect SOURCES singleselect.cc)

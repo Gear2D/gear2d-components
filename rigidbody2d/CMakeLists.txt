@@ -1,2 +1,2 @@
 find_package(Gear2D REQUIRED)
-gear2d_component(dynamics rigidbody2d rigidbody2d.cc)
+g2dcomponent(FAMILY dynamics TYPE rigidbody2d SOURCES rigidbody2d.cc)

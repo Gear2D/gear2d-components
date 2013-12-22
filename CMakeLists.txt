@@ -1,11 +1,14 @@
 project(gear2d)
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/" "${CMAKE_SOURCE_DIR}")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake/" "${CMAKE_SOURCE_DIR}")
+#set(CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX})
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif (NOT CMAKE_BUILD_TYPE)
+
+message(STATUS ${CMAKE_PREFIX_PATH} ---- ${CMAKE_MODULE_PATH})
 
 include(GetGitRevisionDescription)
 
@@ -37,7 +40,6 @@ set(SDL2_BUILDING_LIBRARY 1)
 find_package(Gear2D REQUIRED)
 
 set(COMPONENT_INSTALL_DIR lib/gear2d/component)
-
 include_directories(${Gear2D_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
 link_directories(${Gear2D_LINK_DIR})
 
@@ -79,6 +81,8 @@ add_subdirectory(space2d)
 add_subdirectory(spritesheet)
 
 add_subdirectory(doc)
+
+# cpack stuff
 if (WIN32)
 	set(CPACK_SOURCE_GENERATOR ZIP)
 	set(CPACK_GENERATOR NSIS;ZIP)
@@ -115,5 +119,7 @@ if(NOT WIN32)
 	set(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 	set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CMAKE_SYSTEM_PROCESSOR}")
 endif(NOT WIN32)
+
+
 
 include(CPack)

@@ -1,2 +1,2 @@
 find_package(Gear2D REQUIRED)
-gear2d_component(animation spritesheet spritesheet.cc)
+g2dcomponent(FAMILY animation TYPE spritesheet SOURCES spritesheet.cc)

@@ -3,12 +3,12 @@ find_package(SDL2_image REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(Gear2D REQUIRED)
 
-add_library(renderer2 MODULE renderer2.cc renderer2.h renderbase.h renderbase.cc texture.h texture.cc)
+g2dcomponent(FAMILY renderer
+             TYPE renderer2
+             SOURCES 
+             renderer2.cc renderer2.h renderbase.h renderbase.cc texture.h texture.cc)
 
-install(TARGETS renderer2
-		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
-)
-
+include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR})
 target_link_libraries(renderer2 ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY} ${Gear2D_LIBRARY})
 
 if (WIN32)

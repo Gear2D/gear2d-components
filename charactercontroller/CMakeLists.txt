@@ -1,2 +1,4 @@
 find_package(Gear2D REQUIRED)
-gear2d_component(controller charactercontroller charactercontroller.cc)
+g2dcomponent(FAMILY controller
+             TYPE charactercontroller
+             SOURCES charactercontroller.cc)
