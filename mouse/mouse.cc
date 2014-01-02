@@ -44,9 +44,9 @@ class mouse : public component::base {
 
       if (read<int>("mouse.x") != x) write("mouse.x", x);
       if (read<int>("mouse.y") != y) write("mouse.y", y);
-	  if (read<int>("mouse.1") != bt1) { write<int>("mouse.1", bt1 != 0); write<int>("mouse.left", bt1 != 0); }
-	  if (read<int>("mouse.2") != bt2) { write<int>("mouse.2", bt2 != 0); write<int>("mouse.middle", bt2 != 0); }
-	  if (read<int>("mouse.3") != bt3) { write<int>("mouse.3", bt3 != 0); write<int>("mouse.right", bt3 != 0); }
+      if (read<int>("mouse.1") != bt[0]) { write<int>("mouse.1", bt[0]); write<int>("mouse.left", bt[0]); }
+      if (read<int>("mouse.2") != bt[1]) { write<int>("mouse.2", bt[1]); write<int>("mouse.middle", bt[1]); }
+      if (read<int>("mouse.3") != bt[2]) { write<int>("mouse.3", bt[2]); write<int>("mouse.right", bt[2]); }
     }
     
   private:
@@ -57,11 +57,7 @@ class mouse : public component::base {
     static int x;
     static int y;
     
-    /* buttons */
-    static int bt1;
-    static int bt2;
-    static int bt3;
-    
+    static int bt[5];
     static bool initialized;
     
   private:
@@ -75,14 +71,29 @@ class mouse : public component::base {
           return;
         }
       }
+      
+      memset(bt, 0, sizeof(bt));
       initialized = true;
     }
     static void globalupdate(timediff dt) {
       if (!initialized) return;
       Uint8 flags = SDL_GetMouseState(&x, &y);
-      bt1 = flags & SDL_BUTTON(SDL_BUTTON_LEFT);
-      bt2 = flags & SDL_BUTTON(SDL_BUTTON_MIDDLE);
-      bt3 = flags & SDL_BUTTON(SDL_BUTTON_RIGHT);
+      
+      /* iterate through buttons */
+      for (int i = 0; i < 5; i++) {
+        int & b = bt[i];
+        if (flags & SDL_BUTTON(i+1)) { /* is it pressed now? */
+          if (b == 0) 
+            b = 1; /* if it was not clicked, it is now */
+          else if (b == 1)
+            b = 2; /* if it was clicked, it is now pressed */
+        } else { /* is it not-pressed now? */
+          if (b == 2)
+            b = 3; /* it was not pressed, now is released */
+          else if (b == 3)
+            b = 0; /* it was released, now its not clicked */
+        }
+      }
     }
 };
 
@@ -90,9 +101,7 @@ int mouse::voters = 0;
 int mouse::voting = 0;
 int mouse::x = 0;
 int mouse::y = 0;
-int mouse::bt1 = 0;
-int mouse::bt2 = 0;
-int mouse::bt3 = 0;
+int mouse::bt[5];
 bool mouse::initialized = false;
 
 g2dcomponent(mouse, mouse, mouse);
