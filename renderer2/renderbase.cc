@@ -1,8 +1,11 @@
 #include "renderbase.h"
 #include "renderer2.h"
+#include "text.h"
 
 #include "SDL.h"
 #include "SDL_image.h"
+
+#include <unordered_map>
 
 //set<renderer2*> renderbase::renderers;
 map<string, SDL_Texture *> renderbase::rawtextures;
@@ -88,6 +91,59 @@ SDL_Texture * renderbase::load(const string & filename) {
     tex = i->second;
   }
   return tex;
+}
+
+SDL_Texture * renderbase::fromtext(text & source) {
+  static std::map<std::string, TTF_Font *> fonts;
+  static char buf[5];
+  sprintf(buf, "%4d", (int)source.font.size);
+  string fontid = ((string&)source.font.name) + buf;
+  TTF_Font * f;
+  SDL_Texture * raw; SDL_Surface * tmpsurface;
+  auto it = fonts.find(fontid);
+  if (it == fonts.end()) {
+    f = TTF_OpenFont(((std::string&)source.font.name).c_str(), source.font.size);
+    if (f == nullptr) {
+      moderr("renderer2");
+      trace("Cannot open font", fontid, "Error:", TTF_GetError());
+      return nullptr;
+    }
+    
+    fonts.insert(it, { fontid, f });
+  } else {
+    f = it->second;
+  }
+  
+  SDL_Color color = {
+    source.color.r * 255, 
+    source.color.g * 255, 
+    source.color.b * 255
+  };
+  
+
+  /*
+#define TTF_STYLE_NORMAL        0x00
+#define TTF_STYLE_BOLD          0x01
+#define TTF_STYLE_ITALIC        0x02
+#define TTF_STYLE_UNDERLINE     0x04
+#define TTF_STYLE_STRIKETHROUGH 0x08
+*/
+
+  string & style = (string&)source.style;
+  int styleflags = TTF_STYLE_NORMAL
+    | source.bold ? TTF_STYLE_BOLD : 0
+    | source.italic ? TTF_STYLE_ITALIC : 0
+    | source.underline ? TTF_STYLE_UNDERLINE : 0
+    | source.strikethrough ? TTF_STYLE_STRIKETHROUGH : 0
+    ;
+    
+  TTF_SetFontStyle(f, styleflags);
+  
+  if (source.blended) {
+    tmpsurface = TTF_RenderText_Blended(f, ((std::string&)source.text).c_str(), color);
+  } else {
+    tmpsurface = TTF_RenderText_Solid(f, ((std::string&)source.text).c_str(), color);
+  }
 }
 
 int renderbase::update() {

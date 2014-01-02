@@ -12,6 +12,6 @@ LOCAL_SRC_FILES := \
   $(subst $(LOCAL_PATH)/,, \
   $(wildcard $(LOCAL_PATH)/*.cc))
 
-LOCAL_STATIC_LIBRARIES := SDL2_image gear2d_static
+LOCAL_STATIC_LIBRARIES := SDL2_image SDL2_ttf gear2d_static
 
 include $(BUILD_STATIC_LIBRARY)

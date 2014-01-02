@@ -39,10 +39,56 @@ void renderer2::surfaceschanged(string pid, component::base * lastwrite, object 
   loadsurfaces(surfacelist);
 }
 
+void renderer2::textstylechanged(string pid, component::base * lastwrite, object * owner) {
+  string id = pid.substr(0, pid.find('.'));
+  text * textp = texts[id];
+  if (textp == nullptr) { return; } /* lolwut? */
+  text & t =  *textp;
+  modinfo("renderer2");
+  trace("Style changed for text", id + '.', "Will recalculate style flags.");
+  
+  
+  string & style = ((string&)t.style);
+  t.bold = style.find("bold") != string::npos;
+  t.italic = style.find("italic") != string::npos;
+  t.underline = style.find("underline") != string::npos;
+  t.strikethrough = style.find("strikethrough") != string::npos;
+  t.dirty = true;
+  SDL_Texture * raw, * oldraw;
+  raw = renderbase::fromtext(t);
+  oldraw = t.rendered->raw;
+  wiretexture(id, raw);
+
+  if (oldraw != nullptr) {
+    SDL_DestroyTexture(oldraw);
+  }
+}
+
+
+void renderer2::textchanged(string pid, component::base * lastwrite, object * owner) {
+  string id = pid.substr(0, pid.find('.'));
+  text * textp = texts[id];
+  if (textp == nullptr) { return; } /* lolwut? */
+  text & t =  *textp;
+  modinfo("renderer2");
+  trace("Text changed for text", id + '.');
+
+  t.dirty = true;
+  SDL_Texture * raw, * oldraw;
+  raw = renderbase::fromtext(t);
+  oldraw = t.rendered->raw;
+  wiretexture(id, raw);
+
+  if (oldraw != nullptr) {
+    SDL_DestroyTexture(oldraw);
+  }
+}
+
+
 void renderer2::zchanged(string pid, component::base * lastwrite, object * owner) {
   modinfo("renderer2");
   string id = pid.substr(0, pid.find('.'));
-  trace("zchanged for", id);
+  trace("z changed for", id);
   texture * t = textures[id];
   
   // remove and re-insert in the z new order
@@ -80,9 +126,11 @@ void renderer2::setup(object::signature & s) {
   hook("renderer.surfaces", (component::call)&renderer2::surfaceschanged);
   
   loadsurfaces(surfacelist);
+  loadtexts(textlist);
 }
 
 void renderer2::loadsurfaces(const string & surfacelist) {
+  if (surfacelist.empty()) return;
   /* iterate through surface list,  initializing each one of them */
   modinfo("renderer2");
   size_t pos = string::npos;
@@ -97,66 +145,117 @@ void renderer2::loadsurfaces(const string & surfacelist) {
     
     /* get id=name */
     string id = surfdef.substr(0,  pos);
-    string filename = surfdef.substr(pos+1);
-    trim(filename);
+    string fname = surfdef.substr(pos+1);
+    trim(fname);
     size_t i = id.size() + 1;
     string p(id + ". ");
     
-    trace("Loading", filename, "as", id);
-    SDL_Texture * raw = renderbase::load(filename);
-    
-    texture * tp = nullptr;
-    
-    /* check if we have that loaded already */
-    auto it = textures.find(id);
-    if (it != textures.end()) {
-      if (it->second->raw == raw) {
-        trace("Skipping texture", id, filename, "because its already loaded!");
-        continue;
-      } else {
-        trace("Switching texture id", id, "to", filename);
-        tp = it->second;
-      }
-    }
-    else {
-      tp = new texture();
-      textures[id] = tp;
+    trace("Loading", fname, "as", id);
+    SDL_Texture * raw = renderbase::load(fname);
+    if (raw == nullptr) {
+      continue;
     }
     
-    texture & t = *tp;
-    t.id = id;
-    p[i] = 'x'; t.x = sig.init(p, .0f);
-    p[i] = 'y'; t.y = sig.init(p, .0f);
-    p[i] = 'z'; t.z = sig.init(p, .0f);
-    t.oldz = t.z;
-    
-    /* hook texture z */
-    hook(p, (component::call)&renderer2::zchanged);
-    
-    /* user may explicitly define to stretch w and h */
-    p[i] = 'w'; t.w = sig.init(p, sig[p] == "renderer.w" ? renderbase::screenwidth : renderbase::querywidth(raw));
-    if (sig[p].empty() || sig[p] == "clip.w") t.bindclipw = true;
-    p[i] = 'h'; t.h = sig.init(p, sig[p] == "renderer.h" ? renderbase::screenheight : renderbase::queryheight(raw));
-    if (sig[p].empty() || sig[p] == "clip.h") t.bindcliph = true;
-    t.bind = sig.init(id + ".bind", 1);
-    t.objx = sig.init("x", .0f);
-    t.objy = sig.init("y", .0f);
-    t.objz = sig.init("z", .0f);
-    t.rotation = sig.init(id + ".rotation", .0f);
-    t.raw = raw;
-    t.alpha = sig.init(id + ".alpha", 1.0f);
-    t.clip.x = sig.init(id + ".clip.x", 0);
-    t.clip.y = sig.init(id + ".clip.y", 0);
-    t.clip.w = sig.init(id + ".clip.w", renderbase::querywidth(raw));
-    t.clip.h = sig.init(id + ".clip.h", renderbase::queryheight(raw));
-    t.render = sig.init(id + ".render", true);
-    
-    /* hook object z */
-    hook("z", (component::call)&renderer2::zchanged);
-
-    renderbase::renderorder.insert(zorder(t.z, tp));
+    wiretexture(id, raw);
   }
 }
+
+texture * renderer2::wiretexture(const string & id, SDL_Texture * raw) {
+  modinfo("renderer2");
+  size_t i = id.size() + 1;
+  string p(id + ". ");
+
+  texture * tp = nullptr;
+
+  /* check if we have that loaded already */
+  auto it = textures.find(id);
+  if(it != textures.end()) {
+    if(it->second->raw == raw) {
+      trace("Skipping texture", id, "because its already loaded!");
+      return it->second;
+    } else {
+      trace("Switching texture id", id, "to a new texture");
+      tp = it->second;
+    }
+  } else {
+    tp = new texture();
+    textures[id] = tp;
+  }
+
+  texture & t = *tp;
+  t.id = id;
+  p[i] = 'x'; t.x = sig.init(p, .0f);
+  p[i] = 'y'; t.y = sig.init(p, .0f);
+  p[i] = 'z'; t.z = sig.init(p, .0f);
+  t.oldz = t.z;
+
+  /* hook texture z */
+  hook(p, (component::call)&renderer2::zchanged);
+
+  /* user may explicitly define to stretch w and h */
+  p[i] = 'w'; t.w = sig.init(p, sig[p] == "renderer.w" ? renderbase::screenwidth : renderbase::querywidth(raw));
+  if (sig[p].empty() || sig[p] == "clip.w") t.bindclipw = true;
+  p[i] = 'h'; t.h = sig.init(p, sig[p] == "renderer.h" ? renderbase::screenheight : renderbase::queryheight(raw));
+  if (sig[p].empty() || sig[p] == "clip.h") t.bindcliph = true;
+  t.bind = sig.init(id + ".bind", 1);
+  t.objx = sig.init("x", .0f);
+  t.objy = sig.init("y", .0f);
+  t.objz = sig.init("z", .0f);
+  t.rotation = sig.init(id + ".rotation", .0f);
+  t.raw = raw;
+  t.alpha = sig.init(id + ".alpha", 1.0f);
+  t.clip.x = sig.init(id + ".clip.x", 0);
+  t.clip.y = sig.init(id + ".clip.y", 0);
+  t.clip.w = sig.init(id + ".clip.w", renderbase::querywidth(raw));
+  t.clip.h = sig.init(id + ".clip.h", renderbase::queryheight(raw));
+  t.render = sig.init(id + ".render", true);
+
+  /* hook object z */
+  hook("z", (component::call)&renderer2::zchanged);
+  renderbase::renderorder.insert(zorder(tp->z, tp));
+  return tp;
+}
+
+
+void renderer2::loadtexts(const string & textlist) {
+  if (textlist.empty()) return;
+  modinfo("renderer2");
+  text * textp = nullptr;
+  SDL_Texture * raw;
+  for (string id : gear2d::split(textlist, ' ')) {
+    trace("Generating text id", id);
+    if (texts.find(id) != texts.end())
+    {
+      trace("Not loading", id, "because it was already generated");
+      continue;
+    }
+    
+    string p(id + ". ");
+    textp = new text();
+    texts[id] = textp;
+    text & t = *textp;
+    t.text = sig.init(id + ".text", string(""));
+    t.font.name = sig.init(id + ".font.name", string("freesans.ttf"));
+    t.font.size = sig.init(id + ".font.size", 12);
+    t.style = sig.init(id + ".style", string(""));
+    t.blended = sig.init(id + ".blended", true);
+    string & style = ((string&)t.style);
+    t.bold = style.find("bold") != string::npos;
+    t.italic = style.find("italic") != string::npos;
+    t.underline = style.find("underline") != string::npos;
+    t.strikethrough = style.find("strikethrough") != string::npos;
+    t.color.r = sig.init(id + ".color.r", 0.0f);
+    t.color.g = sig.init(id + ".color.g", 0.0f);
+    t.color.b = sig.init(id + ".color.b", 0.0f);
+    hook(id + ".style", (component::call) &renderer2::textstylechanged);
+    hook(id + ".text", (component::call) &renderer2::textchanged);
+    
+    t.dirty = true;
+    raw = renderbase::fromtext(t); 
+    t.rendered = wiretexture(id, raw);
+  }
+}
+
 
 void renderer2::update(timediff dt) {
   auto total = renderbase::update();

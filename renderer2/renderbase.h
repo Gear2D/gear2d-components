@@ -6,6 +6,7 @@
 #include <string>
 
 #include "texture.h"
+#include "text.h"
 
 using namespace std;
 
@@ -20,6 +21,7 @@ class renderbase {
   public:
     static void initialize(int width = 0, int height = 0, bool fullscreen = false, const string & filepath = "");
     static SDL_Texture * load(const string & filename);
+    static SDL_Texture * fromtext(text & source);
     static int querywidth(SDL_Texture * texture);
     static int queryheight(SDL_Texture * texture);
     static void add(renderer2 * renderer);
