@@ -114,7 +114,6 @@ int renderbase::render() {
   timemark = SDL_GetTicks();
 
 
-  //SDL_SetRenderDrawColor(sdlrenderer, 0xdc, 0x9c, 0x76, 255);
   SDL_RenderClear(sdlrenderer);
   
   for (zorder zpair : renderorder) {
@@ -122,8 +121,10 @@ int renderbase::render() {
     if (!t.render) continue;
     SDL_Rect dest;
     dest.x = t.x; dest.y = t.y; dest.w = t.w; dest.h = t.h;
-    if (t.bind)
-      dest.x += t.objx; dest.y += t.objy; dest.w += t.w; dest.h += t.h;
+    if (t.bind) {
+      dest.x += t.objx;
+      dest.y += t.objy;
+    }  
     
     SDL_Rect src;
     src.x = t.clip.x; src.y = t.clip.y; src.w = t.clip.w; src.h = t.clip.h;
