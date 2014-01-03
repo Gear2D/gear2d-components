@@ -79,6 +79,7 @@ add_subdirectory(rigidbody2d)
 add_subdirectory(singleselect)
 add_subdirectory(space2d)
 add_subdirectory(spritesheet)
+add_subdirectory(touch)
 
 add_subdirectory(doc)
 
