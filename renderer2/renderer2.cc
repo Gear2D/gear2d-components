@@ -235,11 +235,11 @@ void renderer2::loadtexts(const string & textlist) {
     texts[id] = textp;
     text & t = *textp;
     t.text = sig.init(id + ".text", string(""));
-    t.font.name = sig.init(id + ".font.name", string("freesans.ttf"));
+    t.font.face = sig.init(id + ".font.face", string("freesans.ttf"));
     t.font.size = sig.init(id + ".font.size", 12);
     t.style = sig.init(id + ".style", string(""));
     t.blended = sig.init(id + ".blended", true);
-    string & style = ((string&)t.style);
+    string style = (string)t.style;
     t.bold = style.find("bold") != string::npos;
     t.italic = style.find("italic") != string::npos;
     t.underline = style.find("underline") != string::npos;

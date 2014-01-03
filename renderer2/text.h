@@ -9,7 +9,7 @@
 
 struct text {
   struct {
-    gear2d::link<std::string> name;
+    gear2d::link<std::string> face;
     gear2d::link<int> size;
   } font;
 
@@ -18,12 +18,13 @@ struct text {
   } color;
   
   gear2d::link<std::string> style;
+  gear2d::link<std::string> hinting;
   gear2d::link<bool> blended;
   gear2d::link<std::string> text;
  
   bool bold, italic, underline, strikethrough;
   bool dirty; /* set to true if something changed */
-  
+
   texture * rendered;
 };
 

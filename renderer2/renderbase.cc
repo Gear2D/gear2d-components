@@ -96,16 +96,17 @@ SDL_Texture * renderbase::load(const string & filename) {
 SDL_Texture * renderbase::fromtext(text & source) {
   static std::map<std::string, TTF_Font *> fonts;
   static char buf[5];
-  sprintf(buf, "%4d", (int)source.font.size);
-  string fontid = ((string&)source.font.name) + buf;
+  sprintf(buf, "%4.4d", (int)source.font.size);
+  string fontname = (string)source.font.face;
+  string fontid = fontname + buf;
   TTF_Font * f;
   SDL_Texture * raw; SDL_Surface * tmpsurface;
   auto it = fonts.find(fontid);
   if (it == fonts.end()) {
-    f = TTF_OpenFont(((std::string&)source.font.name).c_str(), source.font.size);
+    f = TTF_OpenFont(fontname.c_str(), source.font.size);
     if (f == nullptr) {
       moderr("renderer2");
-      trace("Cannot open font", fontid, "Error:", TTF_GetError());
+      trace("Cannot open font", fontname , "@", buf, "Error:", TTF_GetError());
       return nullptr;
     }
     
@@ -120,15 +121,6 @@ SDL_Texture * renderbase::fromtext(text & source) {
     source.color.b * 255
   };
   
-
-  /*
-#define TTF_STYLE_NORMAL        0x00
-#define TTF_STYLE_BOLD          0x01
-#define TTF_STYLE_ITALIC        0x02
-#define TTF_STYLE_UNDERLINE     0x04
-#define TTF_STYLE_STRIKETHROUGH 0x08
-*/
-
   string & style = (string&)source.style;
   int styleflags = TTF_STYLE_NORMAL
     | source.bold ? TTF_STYLE_BOLD : 0
@@ -139,11 +131,20 @@ SDL_Texture * renderbase::fromtext(text & source) {
     
   TTF_SetFontStyle(f, styleflags);
   
+  TTF_SetFontHinting(f, 3);
+  
   if (source.blended) {
-    tmpsurface = TTF_RenderText_Blended(f, ((std::string&)source.text).c_str(), color);
+    tmpsurface = TTF_RenderText_Blended(f, ((std::string)source.text).c_str(), color);
   } else {
-    tmpsurface = TTF_RenderText_Solid(f, ((std::string&)source.text).c_str(), color);
+    tmpsurface = TTF_RenderText_Solid(f, ((std::string)source.text).c_str(), color);
   }
+  raw = SDL_CreateTextureFromSurface(sdlrenderer, tmpsurface);
+  if (raw == nullptr) {
+    moderr("renderer2");
+    trace("Could not create text texture:", SDL_GetError());
+  }
+  
+  return raw;
 }
 
 int renderbase::update() {
@@ -234,6 +235,14 @@ void renderbase::initialize(int width,  int height, bool fullscreen,const std::s
     error = SDL_InitSubSystem(SDL_INIT_VIDEO) != 0;
     if (error) {
       trace("Could not initialize SDL video subsystem:", SDL_GetError());
+      return;
+    }
+  }
+  
+  if (!TTF_WasInit()) {
+    error = TTF_Init();
+    if (error) {
+      trace("Cannot initialize SDL_ttf:", TTF_GetError());
       return;
     }
   }
