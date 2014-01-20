@@ -206,8 +206,8 @@ texture * renderer2::wiretexture(const string & id, SDL_Texture * raw) {
   t.alpha = sig.init(id + ".alpha", 1.0f);
   t.clip.x = sig.init(id + ".clip.x", 0);
   t.clip.y = sig.init(id + ".clip.y", 0);
-  t.clip.w = sig.init(id + ".clip.w", renderbase::querywidth(raw));
-  t.clip.h = sig.init(id + ".clip.h", renderbase::queryheight(raw));
+  t.clip.w = sig.init(id + ".clip.w", (int)t.w);
+  t.clip.h = sig.init(id + ".clip.h", (int)t.h);
   t.render = sig.init(id + ".render", true);
 
   /* hook object z */
