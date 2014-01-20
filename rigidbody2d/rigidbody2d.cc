@@ -55,51 +55,70 @@ class bounce : public component::base {
     static float dragy;
     static bool initialized;
     
+    gear2d::link<bool> active, iskinematic, nogravity;
+    gear2d::link<float> xspeed, yspeed;
     gear2d::link<float> x, y, w, h;
+    gear2d::link<float> mass;
+    
+    struct collisioninfo {
+      /* information about the collisor */
+      gear2d::link<component::base *> collisor;
+      gear2d::link<float> speedx;
+      gear2d::link<float> speedy;
+
+      /* side of the collision, relative to this object */
+      gear2d::link<int> side;
+
+      /* intersection coordinates */
+      gear2d::link<float> ix;
+      gear2d::link<float> iy;
+      gear2d::link<float> iw;
+      gear2d::link<float> ih;
+    };
+    
+    collisioninfo collision;
 
   public:
     bounce() : dt(0) { }
     virtual component::family family() { return "dynamics"; }
     virtual component::type type() { return "rigidbody2d"; }
     virtual std::string depends() { return "spatial/space2d collider/collider2d kinematics/kinematic2d"; }
-    virtual void handle(parameterbase::id pid, component::base * lastwrite, object::id pidowner) {
-      if (pid == "collider.collision") {
-        component::base * c = read<component::base *>("collider.collision");
-        // we do nothing with an object without mass
-        if (!c->exists("dynamics.mass")) return;
-        if (read<bool>("dynamics.kinematic")) return;
-        const float & m1 = raw<float>("dynamics.mass");
-        const float & m2 = c->raw<float>("dynamics.mass");
-        
-        // detect which side we-re colliding.
-        const float & xspeed = raw<float>("x.speed");
-        const float & yspeed = raw<float>("y.speed");
-        const int & side = raw<int>("collider.collision.side");
-        const float & colxspeed =  raw<float>("collider.collision.speed.x");
-        const float & colyspeed =  raw<float>("collider.collision.speed.y");
+    virtual void collisiondetected(parameterbase::id pid, component::base * lastwrite, object::id pidowner) {
+      // don't cast it because might be another dynamics component
+      component::base * c = read<component::base *>("collider.collision");
+      // we do nothing with an object without mass
+      if (!c->exists("dynamics.mass")) return;
+      if (read<bool>("dynamics.kinematic")) return;
+      const float & m1 = mass;
+      const float & m2 = c->raw<float>("dynamics.mass");
+      
+      // detect which side we-re colliding.
+      const int & side = collision.side;
+      const float & colxspeed =  collision.speedx;
+      const float & colyspeed =  collision.speedy;
 
-        // adjust x and y to non-colliding positions
-        float resxspeed, resyspeed;
-        if (side == left || side == right) {
-          resxspeed = ((m1 - m2) / (m1 + m2)) * xspeed + ((2 * m2) / (m1 + m2)) * colxspeed;
-          write<float>("x.speed", resxspeed);
-          // if side == right, add minus collision width
-          if (side == right) add("x", -read<float>("collider.collision.w"));
-          
-          // if side == left, add collision width
-          if (side == left) add("x", read<float>("collider.collision.w"));
-          //collider.collision.{x|y|w|h}
-        }
-        if (side == top || side == bottom) {
-          resyspeed = ((m1 - m2) / (m1 + m2)) * yspeed + ((2 * m2) / (m1 + m2)) * colyspeed;
-          write<float>("y.speed", resyspeed);
-          if (side == top) add("y", -read<float>("collider.collision.h"));
-          if (side == bottom) add("y", read<float>("collider.collision.h"));
-        }
+      // adjust x and y to non-colliding positions
+      float resxspeed, resyspeed;
+      if (side == left || side == right) {
+        resxspeed = ((m1 - m2) / (m1 + m2)) * xspeed + ((2 * m2) / (m1 + m2)) * colxspeed;
+        xspeed = resxspeed;
+        // if side == right, add minus collision width
+        if (side == right) x += -collision.iw;
+        
+        // if side == left, add collision width
+        if (side == left) x += collision.iw;
+        //collider.collision.{x|y|w|h}
+      }
+      if (side == top || side == bottom) {
+        resyspeed = ((m1 - m2) / (m1 + m2)) * yspeed + ((2 * m2) / (m1 + m2)) * colyspeed;
+        yspeed = resyspeed;
+        if (side == top) y += -collision.ih;
+        if (side == bottom) y += collision.ih;
       }
     }
 
     virtual void setup(object::signature & sig) {
+      sigparser s(sig, this);
       if (!initialized) initialize(
           eval(sig["dynamics.gravity.x"], 0.0f),
           eval(sig["dynamics.gravity.y"], 0.0f),
@@ -114,23 +133,36 @@ class bounce : public component::base {
       }
       init<bool>("dynamics.kinematic", sig["dynamics.kinematic"], false);
       init<bool>("dynamics.nogravity", sig["dynamics.nogravity"], false);
-      hook("collider.collision");
+      hook("collider.collision", (component::call) &bounce::collisiondetected);
+      mass = fetch<float>("dynamics.mass");
       x = fetch<float>("x");
       y = fetch<float>("y");
       w = fetch<float>("w");
       h = fetch<float>("h");
+      active = s.init<bool>("dynamics.active", true);
+      iskinematic = s.init<bool>("dynamics.kinematic", false);
+      nogravity = s.init<bool>("dynamics.nogravity", false);
+      xspeed = s.init<float>("x.speed", 0.0f);
+      yspeed = s.init<float>("y.speed", 0.0f);
+      collision.collisor = fetch<component::base *>("collider.collision");
+      collision.ix = fetch<float>("collider.collision.x");
+      collision.iy = fetch<float>("collider.collision.y");
+      collision.iw = fetch<float>("collider.collision.w");
+      collision.ih = fetch<float>("collider.collision.h");
+      collision.side = fetch<int>("collider.collision.side");
+      collision.speedx = fetch<float>("collider.collision.speed.x");
+      collision.speedy = fetch<float>("collider.collision.speed.y");
     }
 
 
     virtual void update(float dt) {
+      if (!active) return;
       this->dt = dt;
-      if (read<bool>("dynamics.kinematic") == true || read<bool>("dynamics.nogravity") == true) return;
+      if (iskinematic || nogravity) return;
       else {
-        add("x.speed", gx * dt);
-        add("y.speed", gy * dt);
+        xspeed += gx * dt;
+        yspeed += gy * dt;
       }
-
-//       add("x.speed", read<float>("x.speed") * -dragx *dt);
     }
 
   private:
