@@ -57,6 +57,8 @@ class kinetic2d : public component::base {
     linkvec<float> accelmax;
     linkvec<float> pos;
     
+    gear2d::link<bool> active;
+    
   public:
     kinetic2d() {
     };
@@ -68,6 +70,7 @@ class kinetic2d : public component::base {
     
     virtual void setup(object::signature & sig) {
       sigparser s(sig, this);
+      active = s.init("kinematics.active", true);
       speed.x = s.init("x.speed", 0.0f);
       speedmax.x = s.init("x.speed.max", std::numeric_limits<float>::infinity());
       speedmin.x = s.init("x.speed.min", speedmax.x * -1.0f);
@@ -87,7 +90,7 @@ class kinetic2d : public component::base {
     }
     
     virtual void update(timediff dt) {
-      modinfo("kinematic2d");
+      if (!active) return;
       clamp(accel.x, accelmin.x, accelmax.x);
       clamp(accel.y, accelmin.y, accelmax.y);
 
@@ -99,7 +102,6 @@ class kinetic2d : public component::base {
       speed.y += accel.y *dt;
       clamp(speed.x, speedmin.x, speedmax.x);
       clamp(speed.y, speedmin.y, speedmax.y);
-      trace(speed.x, accel.x, speed.y, accel.y, owner->name());
     }
 };
 
