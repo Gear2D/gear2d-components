@@ -172,7 +172,6 @@ class keyboard : public component::base {
     }
   private:
     static void doupdate() {
-      modinfo("keyboard");
       if (usedkeys.size() == 0) return;
       
       for (auto it = usedkeys.begin(); it != usedkeys.end(); it++) {
@@ -180,9 +179,6 @@ class keyboard : public component::base {
         int rawstate = kbstate[key]; // pressed or not-pressed
         int status = keys[key].state; // unpressed, clicked, pressed, released
 
-        trace(SDL_GetScancodeName(key), key, rawstate, status);
-        
-		// start unchanged in this frame
         keys[key].changed = false;
 
         // unpressed
