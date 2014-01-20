@@ -92,13 +92,26 @@ class collider : public component::base {
     gear2d::link<string> ignore;
     gear2d::link<bool> binded;
     gear2d::link<std::string> coltype;
+    gear2d::link<bool> active;
     
   public:
-    virtual ~collider() { colliders.erase(this); }
+    virtual ~collider() { colliders.erase(this); activecolliders.erase(this); }
     virtual component::type type() { return "collider2d"; }
     virtual component::family family() { return "collider"; }
     virtual string depends() { return "spatial/space2d kinematics/kinematic2d"; }
-    virtual void handle(parameterbase::id pid, base* lastwrite, object::id owner) {
+    virtual void activechanged(parameterbase::id pid, base* lastwrite, object::id owner) {
+      // maintain a list of active colliders.
+      if (!active) {
+        if (!calculating) {
+          activecolliders.erase(this);
+        } else {
+          toremove.insert(this);
+        }
+      } else {
+        auto wasinserted = activecolliders.insert(this);
+        if (!wasinserted.second)
+          toremove.erase(this);
+      }
     }
     
     virtual void setup(object::signature & sig) {
@@ -106,9 +119,8 @@ class collider : public component::base {
 
       coltype = s.init("collider.type", string("aabb"));
       binded = s.init("collider.bind", true);
-
-//      bool binded = eval(sig["colliderd.bind"], true);
-//      write("collider.bind", binded);
+      active = s.init("collider.active", true);
+      hook("collider.active", (component::call) &collider::activechanged);
 
       float x, y, w, h;
       read("x", x); read("y", y), read("w", w), read("h", h);
@@ -128,7 +140,6 @@ class collider : public component::base {
 
       kinematics.speedx = fetch<float>("x.speed");
       kinematics.speedy = fetch<float>("y.speed");
-
 
       collision.collisor = fetch<component::base *>("collider.collision");
       //write<component::base *>("collider.collision", 0);
@@ -159,6 +170,8 @@ class collider : public component::base {
       if ((string)tag == "") tag = sig["name"];
       
       colliders.insert(this);
+      if (active)
+        activecolliders.insert(this);
     }
     
     virtual void update(float dt) {
@@ -177,19 +190,22 @@ class collider : public component::base {
     }
     
     static void calculate() {
-      modinfo("collider2d");
-      if (colliders.size() <= 1) return;
-      for (std::set<collider *>::iterator i = colliders.begin(); i != colliders.end(); i++) {
+      if (activecolliders.size() <= 1) return;
+      calculating = true;
+      for (std::set<collider *>::iterator i = activecolliders.begin(); i != activecolliders.end(); i++) {
         
         collider * first = *i;
+        if (first->active == false) continue;
         // tests from this to the rest
         std::set<collider *>::iterator j = i;
         j++;
-        for (; j != colliders.end(); j++) {
+        for (; j != activecolliders.end(); j++) {
           collider * second = *j;
           //const string & ftype = first->raw<string>("collider.type");
           //const string & stype = second->raw<string>("collider.type");
           
+          if (second->active == false) continue;
+            
           // ignopr
           if ((((string)second->ignore).find(first->tag) != string::npos) && (((string)first->ignore).find(second->tag) != string::npos)) {
             continue;
@@ -215,7 +231,6 @@ class collider : public component::base {
           }
           
           if (testaabb(faabb, saabb)) {
-            modinfo("collider2d");
             
             // calculates intersection
             rect inter;
@@ -237,7 +252,6 @@ class collider : public component::base {
               else { fc = 3; sc = 1; }
             }
             
-            trace(first->owner->name(), fc, "collides with", second->owner->name(), sc, faabb.x, "-", inter.x, faabb.y, "-", inter.y, inter.w, inter.h);
             if (((string)first->ignore).find(second->tag) == string::npos) {
               first->collision.ix = inter.x;
               first->collision.iy = inter.y;
@@ -286,6 +300,12 @@ class collider : public component::base {
           }
         }
       }
+      for (collider * c : toremove) {
+        if (!c->active)
+          activecolliders.erase(c);
+      }
+      toremove.clear();
+      calculating = false;
     }
     static bool testaabb(rect & a, rect & b) {
       return (
@@ -299,9 +319,15 @@ class collider : public component::base {
   private:
     static int voteforupdate;
     static std::set<collider *> colliders;
+    static std::set<collider *> activecolliders;
+    static std::set<collider *> toremove;
+    static bool calculating;
 };
 
 int collider::voteforupdate = 0;
 std::set<collider*> collider::colliders;
+std::set<collider*> collider::activecolliders;
+std::set<collider*> collider::toremove;
+bool collider::calculating;
 
 g2dcomponent(collider, collider, collider2d);
