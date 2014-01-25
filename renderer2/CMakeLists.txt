@@ -9,7 +9,7 @@ g2dcomponent(FAMILY renderer
              renderer2.cc renderer2.h renderbase.h renderbase.cc texture.h texture.cc)
 
 include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR})
-target_link_libraries(renderer2 ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY} ${Gear2D_LIBRARY})
+target_link_libraries(renderer2 ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY} ${GEAR2D_LIBRARY})
 
 if (WIN32)
 	get_filename_component(SDL2_IMAGE_LIBRARY_DIR ${SDL2_IMAGE_LIBRARY} PATH)

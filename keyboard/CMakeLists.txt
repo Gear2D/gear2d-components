@@ -3,5 +3,5 @@ find_package(SDL2 REQUIRED)
 
 g2dcomponent(TYPE keyboard SOURCES keyboard.cc)
 
-target_link_libraries(keyboard ${SDL2_LIBRARY} ${Gear2D_LIBRARY})
+target_link_libraries(keyboard ${SDL2_LIBRARY} ${GEAR2D_LIBRARY})
 include_directories(${SDL2_INCLUDE_DIR})

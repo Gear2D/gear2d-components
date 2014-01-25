@@ -9,7 +9,7 @@ install(TARGETS renderer
 		LIBRARY DESTINATION ${COMPONENT_INSTALL_DIR}/renderer
 )
 
-target_link_libraries(renderer ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY} ${Gear2D_LIBRARY})
+target_link_libraries(renderer ${SDL2_LIBRARY} ${SDL2_IMAGE_LIBRARY} ${SDL2_TTF_LIBRARY} ${GEAR2D_LIBRARY})
 
 if (WIN32)
 	get_filename_component(SDL2_IMAGE_LIBRARY_DIR ${SDL2_IMAGE_LIBRARY} PATH)
