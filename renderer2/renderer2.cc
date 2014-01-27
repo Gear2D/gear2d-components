@@ -164,6 +164,7 @@ texture * renderer2::wiretexture(const string & id, SDL_Texture * raw) {
   modinfo("renderer2");
   size_t i = id.size() + 1;
   string p(id + ". ");
+  bool rewiring = false;
 
   texture * tp = nullptr;
 
@@ -176,6 +177,7 @@ texture * renderer2::wiretexture(const string & id, SDL_Texture * raw) {
     } else {
       trace("Switching texture id", id, "to a new texture");
       tp = it->second;
+      rewiring = true;
     }
   } else {
     tp = new texture();
@@ -193,22 +195,36 @@ texture * renderer2::wiretexture(const string & id, SDL_Texture * raw) {
   hook(p, (component::call)&renderer2::zchanged);
 
   /* user may explicitly define to stretch w and h */
-  p[i] = 'w'; t.w = sig.init(p, sig[p] == "renderer.w" ? renderbase::screenwidth : renderbase::querywidth(raw));
-  if (sig[p].empty() || sig[p] == "clip.w") t.bindclipw = true;
-  p[i] = 'h'; t.h = sig.init(p, sig[p] == "renderer.h" ? renderbase::screenheight : renderbase::queryheight(raw));
-  if (sig[p].empty() || sig[p] == "clip.h") t.bindcliph = true;
-  t.bind = sig.init(id + ".bind", 1);
-  t.objx = sig.init("x", .0f);
-  t.objy = sig.init("y", .0f);
-  t.objz = sig.init("z", .0f);
-  t.rotation = sig.init(id + ".rotation", .0f);
+  if (!rewiring) {
+    /* only re-read sig if rewiring stuff this is a new stuff */
+    p[i] = 'w'; 
+    t.w = sig.init(p, sig[p] == "renderer.w" ? renderbase::screenwidth : renderbase::querywidth(raw));
+    if (sig[p].empty() || sig[p] == "clip.w") t.bindclipw = true;
+    p[i] = 'h'; t.h = sig.init(p, sig[p] == "renderer.h" ? renderbase::screenheight : renderbase::queryheight(raw));
+    if (sig[p].empty() || sig[p] == "clip.h") t.bindcliph = true;
+    t.bind = sig.init(id + ".bind", 1);
+    t.objx = sig.init("x", .0f);
+    t.objy = sig.init("y", .0f);
+    t.objz = sig.init("z", .0f);
+    t.rotation = sig.init(id + ".rotation", .0f);
+    t.alpha = sig.init(id + ".alpha", 1.0f);
+    t.clip.x = sig.init(id + ".clip.x", 0);
+    t.clip.y = sig.init(id + ".clip.y", 0);
+    t.clip.w = sig.init(id + ".clip.w", (int)t.w);
+    t.clip.h = sig.init(id + ".clip.h", (int)t.h);
+    t.render = sig.init(id + ".render", true);
+  } else {
+    bool resetclipw = false, resetcliph = false;
+    if (t.clip.w == t.w) resetclipw = true;
+    if (t.clip.h == t.h) resetcliph = true;
+    p[i] = 'w';
+    t.w = sig[p] == "renderer.w" ? renderbase::screenwidth : renderbase::querywidth(raw);
+    p[i] = 'h';
+    t.h = sig[p] == "renderer.h" ? renderbase::screenheight : renderbase::queryheight(raw);
+    if (resetclipw) t.clip.w = t.w;
+    if (resetcliph) t.clip.h = t.h;
+  }
   t.raw = raw;
-  t.alpha = sig.init(id + ".alpha", 1.0f);
-  t.clip.x = sig.init(id + ".clip.x", 0);
-  t.clip.y = sig.init(id + ".clip.y", 0);
-  t.clip.w = sig.init(id + ".clip.w", (int)t.w);
-  t.clip.h = sig.init(id + ".clip.h", (int)t.h);
-  t.render = sig.init(id + ".render", true);
 
   /* hook object z */
   hook("z", (component::call)&renderer2::zchanged);
