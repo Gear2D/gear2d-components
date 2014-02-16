@@ -27,21 +27,27 @@ class renderbase {
     static void add(renderer2 * renderer);
     static void remove(renderer2 * renderer);
     static int update(); /* may render. returns number of surfaces rendered */
+    static int updatecamera(float x, float y, float w, float h);
     
   private:
     static int render();
     
   private:
-    static set<renderer2*> renderers;
     static map<string, SDL_Texture *> rawtextures;
     static SDL_Renderer * sdlrenderer;
     static SDL_Window * sdlwindow;                             // TODO: add support for multiple windows
     static int width, height;
     
+    struct camerastruct {
+      float x, y, w, h;
+    };
+    
+    static camerastruct camera;
+    
     static int votesleft;
     static int starttime;
     static bool error;
-
+    static set<renderer2*> renderers;
     static SDL_Texture * numberstex;
     
   public:

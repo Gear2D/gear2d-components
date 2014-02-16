@@ -99,25 +99,46 @@ void renderer2::zchanged(string pid, component::base * lastwrite, object * owner
   t->oldz = t->z;
 }
 
+void renderer2::camerachanged(string pid, component::base * lastwrite, object * owner) {
+  renderbase::updatecamera(camera.x, camera.y, camera.w, camera.h);
+}
+
+
 
 
 void renderer2::setup(object::signature & s) {
   modinfo("renderer2");
   sig = sigparser(s, this);
+  globalsig = sigparser(s, &globals);
   int screenwidth; int screenheight;
-  screenwidth = sig.init("renderer.w", 0);
-  screenheight = sig.init("renderer.h", 0);
+  
+  /* initialize screen things */
+  screenwidth = globalsig.init("renderer.w", 0);
+  screenheight = globalsig.init("renderer.h", 0);
+  
+  /* initialize camera things */
+  camera.w = globalsig.init("camera.w", (float)screenwidth);
+  camera.h = globalsig.init("camera.h", (float)screenheight);
+  camera.x = globalsig.init<float>("camera.x", 0.0f);
+  camera.y = globalsig.init<float>("camera.y", 0.0f);
+  
+  /* hook on camera changing */
+  hook(&globals, "camera.x", (component::call)&renderer2::camerachanged);
+  hook(&globals, "camera.y", (component::call)&renderer2::camerachanged);
+  hook(&globals, "camera.w", (component::call)&renderer2::camerachanged);
+  hook(&globals, "camera.h", (component::call)&renderer2::camerachanged);
   
   if (!renderbase::initialized) {
     bool fullscreen;
     fullscreen = eval<bool>(s["renderer.fullscreen"], false) == true;
     renderbase::initialize(screenwidth, screenheight, fullscreen, s["imgpath"]);
+    renderbase::updatecamera(camera.x, camera.y, camera.w, camera.h);
   }
   
   // write corrected w/h
   write("renderer.w", renderbase::screenwidth);
   write("renderer.h", renderbase::screenheight);
-
+  
   renderbase::add(this);
   
   textlist = sig.init("renderer.texts");

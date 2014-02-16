@@ -22,6 +22,7 @@ bool renderbase::showfps = false;
 SDL_Texture * renderbase::numberstex = nullptr;
 int renderbase::screenwidth;
 int renderbase::screenheight;
+renderbase::camerastruct renderbase::camera;
 
 
 
@@ -270,17 +271,13 @@ void renderbase::initialize(int width,  int height, bool fullscreen,const std::s
 
   /* the value passed in width and height defines the logical size, 
    * so we use it to define logical size later  */
-  screenwidth = width == 0 ? displaymode.w : width;
-  screenheight = height == 0 ? displaymode.h : height;
-
-  if (width == 0 || fullscreen) {
-    width = displaymode.w;
-  }
-  if (height == 0 || fullscreen) {
-    height = displaymode.h;
-  }
-  trace("Initializing renderer2 width =", width, screenwidth, "height =", height, screenheight, "fullscreen =", fullscreen);
-  error = SDL_CreateWindowAndRenderer(width, height, flags, &sdlwindow, &sdlrenderer) != 0;
+  if (width == 0) width = displaymode.w;
+  if (height == 0) height = displaymode.h;
+  screenwidth = width;
+  screenheight = height;
+  camera = { 0, 0, width, height };
+  
+  error = SDL_CreateWindowAndRenderer(screenwidth, screenheight, flags, &sdlwindow, &sdlrenderer) != 0;
   if (error) {
     trace("Could not create window or renderer:", SDL_GetError());
     return;
@@ -288,8 +285,9 @@ void renderbase::initialize(int width,  int height, bool fullscreen,const std::s
   
   SDL_SetRenderDrawColor(sdlrenderer, 0, 0, 0, 0);
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
-  SDL_RenderSetLogicalSize(sdlrenderer, screenwidth, screenheight);
+  SDL_RenderSetLogicalSize(sdlrenderer, camera.w, camera.h);
   
+  // TODO: make camera.x and y affect position of stuff
 
   
   imgpath = filepath;
@@ -302,6 +300,12 @@ void renderbase::initialize(int width,  int height, bool fullscreen,const std::s
   SDL_RWops * numbersrw = SDL_RWFromConstMem(numbers_png, numbers_png_len);
   numberstex = IMG_LoadTexture_RW(sdlrenderer, numbersrw, 1);
 
-  trace("Finished renderer initialization", log::info);
+  trace.i("Finished renderer initialization");
   initialized = true;
 }
+
+int renderbase::updatecamera(float x, float y, float w, float h) {
+  camera = { x, y, w, h };
+  SDL_RenderSetLogicalSize(sdlrenderer, camera.w, camera.h);
+}
+
