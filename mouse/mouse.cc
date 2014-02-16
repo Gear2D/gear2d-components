@@ -61,6 +61,25 @@ class mouse : public component::base {
     static bool initialized;
     
   private:
+    
+    /* use watchers because mouse x/y is clipped to screen with events, but not with getmousestate */
+    static int mousewatcher(void * userdata, SDL_Event * ev) {
+      switch (ev->type) {
+        case SDL_MOUSEMOTION:
+          x = ev->motion.x;
+          y = ev->motion.y;
+          break;
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+          x = ev->button.x;
+          y = ev->button.y;
+          break;
+        default:
+          break;
+      }
+      return 1;
+    }
+    
     static void initialize() {
       if (initialized) return;
       if (!SDL_WasInit(SDL_INIT_VIDEO)) {
@@ -72,12 +91,15 @@ class mouse : public component::base {
         }
       }
       
+      /* add mouse watcher */
+      SDL_AddEventWatch(mousewatcher, NULL);
+      
       memset(bt, 0, sizeof(bt));
       initialized = true;
     }
     static void globalupdate(timediff dt) {
       if (!initialized) return;
-      Uint8 flags = SDL_GetMouseState(&x, &y);
+      Uint8 flags = SDL_GetMouseState(NULL, NULL);
       
       /* iterate through buttons */
       for (int i = 0; i < 5; i++) {
