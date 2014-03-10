@@ -36,7 +36,7 @@ add_definitions(-std=c++11)
 set(SDL2_BUILDING_LIBRARY 1)
 
 find_package(Gear2D REQUIRED)
-message("Gear2D found at directory: ${Gear2D_LINK_DIR}")
+message(STATUS "Gear2D version ${Gear2D_VERSION} found at directory ${Gear2D_LIBRARY_DIR}")
 
 set(COMPONENT_INSTALL_DIR lib/gear2d/component)
 include_directories(${Gear2D_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
