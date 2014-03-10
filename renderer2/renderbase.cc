@@ -199,7 +199,12 @@ int renderbase::render() {
     if (t.bind) {
       dest.x += t.objx;
       dest.y += t.objy;
-    }  
+    }
+    
+    if (!t.fixed) {
+      dest.x -= camera.x;
+      dest.y -= camera.y;
+    }
     
     SDL_Rect src;
     src.x = t.clip.x; src.y = t.clip.y; src.w = t.clip.w; src.h = t.clip.h;

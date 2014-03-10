@@ -224,6 +224,7 @@ texture * renderer2::wiretexture(const string & id, SDL_Texture * raw) {
     p[i] = 'h'; t.h = sig.init(p, sig[p] == "renderer.h" ? renderbase::screenheight : renderbase::queryheight(raw));
     if (sig[p].empty() || sig[p] == "clip.h") t.bindcliph = true;
     t.bind = sig.init(id + ".bind", 1);
+    t.fixed = sig.init(id + ".fixed", false);
     t.objx = sig.init("x", .0f);
     t.objy = sig.init("y", .0f);
     t.objz = sig.init("z", .0f);

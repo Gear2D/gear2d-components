@@ -18,6 +18,7 @@ struct texture {
     gear2d::link<float> x, y, z;                            // this texture position
     gear2d::link<int> w, h;                                 // texture size
     gear2d::link<int> bind;
+    gear2d::link<bool> fixed;
     gear2d::link<float> objx, objy, objz;
     gear2d::link<float> rotation;
     gear2d::link<float> alpha;
