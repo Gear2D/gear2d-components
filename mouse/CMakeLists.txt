@@ -1,3 +1,5 @@
 find_package(Gear2D REQUIRED)
+find_package(SDL2 REQUIRED)
+include_directories(${SDL2_INCLUDE_DIR})
 g2dcomponent(TYPE mouse SOURCES mouse.cc)
 target_link_libraries(mouse ${SDL2_LIBRARY} ${GEAR2D_LIBRARY})
