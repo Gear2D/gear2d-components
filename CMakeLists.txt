@@ -8,8 +8,6 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif (NOT CMAKE_BUILD_TYPE)
 
-message(STATUS ${CMAKE_PREFIX_PATH} ---- ${CMAKE_MODULE_PATH})
-
 include(GetGitRevisionDescription)
 
 git_describe(Gear2D_COMPONENT_VERSION --tags)
@@ -38,6 +36,7 @@ add_definitions(-std=c++11)
 set(SDL2_BUILDING_LIBRARY 1)
 
 find_package(Gear2D REQUIRED)
+message("Gear2D found at directory: ${Gear2D_LINK_DIR}")
 
 set(COMPONENT_INSTALL_DIR lib/gear2d/component)
 include_directories(${Gear2D_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
