@@ -40,7 +40,7 @@ message(STATUS "Gear2D version ${Gear2D_VERSION} found at directory ${Gear2D_LIB
 
 set(COMPONENT_INSTALL_DIR lib/gear2d/component)
 include_directories(${Gear2D_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
-link_directories(${Gear2D_LINK_DIR})
+link_directories(${Gear2D_LIBRARY_DIR})
 
 if(WIN32)
   get_filename_component(SDL2_MIXER_LIBRARY_DIR ${SDL2_MIXER_LIBRARY} PATH)
