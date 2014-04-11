@@ -68,7 +68,7 @@ class singleselect: public component::base {
       }
       else if (pid == "menu.focus") {
         string focusid = raw<string>("menu.focus");
-        trace(owner->name(), "- Focus is changing to ", focusid, log::info);
+        trace.i(owner->name(), "- Focus is changing to ", focusid);
         if (focusid == "") focusid = optionbyorder.begin()->second->id;
         option * opt = optionbyid[focusid];
         // do not touch it again...
@@ -127,7 +127,7 @@ class singleselect: public component::base {
             opt->itr = success.first;
           }
         }
-        trace(owner->name(), "- Ordering changes:", oid, "to", opt->order, log::info);
+        trace.i(owner->name(), "- Ordering changes:", oid, "to", opt->order);
         return;
       }
     }

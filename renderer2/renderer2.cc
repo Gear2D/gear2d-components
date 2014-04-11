@@ -1,5 +1,4 @@
 #include "gear2d.h"
-#include "log.h"
 
 #include "renderer2.h"
 #include "renderbase.h"

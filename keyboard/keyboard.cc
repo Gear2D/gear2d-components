@@ -153,7 +153,7 @@ class keyboard : public component::base {
         string keyname = *it;
         SDL_Scancode scode = SDL_GetScancodeFromName(keyname.c_str());
         if (scode == SDL_SCANCODE_UNKNOWN) {
-          trace("Key", keyname, "does not have a name. Dropping it.", log::warning);
+          trace.w("Key", keyname, "does not have a name. Dropping it.");
           continue;
         }
 

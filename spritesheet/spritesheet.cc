@@ -156,7 +156,7 @@ class spritesheet : public component::base {
         for (set<string>::iterator i = animations.begin(); i != animations.end(); i++) {
           id = *i;
           if (sig["renderer.surfaces"].find(id) == string::npos) {
-            trace("Unable to load animation ", id, "because its not on the surface list", log::warning);         
+            trace.w("Unable to load animation ", id, "because its not on the surface list");         
             continue;
           }
           animation * a = loadanim(id);

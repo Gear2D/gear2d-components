@@ -156,13 +156,13 @@ class audiosource : public gear2d::component::base {
       if (!SDL_WasInit(SDL_INIT_AUDIO)) {
         if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
           logerr;
-          trace("Unable to initialize the audio subsystem", SDL_GetError(), log::error);
+          trace("Unable to initialize the audio subsystem", SDL_GetError());
           return;
         }
         
         if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) != 0) {
           logerr;
-          trace("Unable to open the audio subsystem", SDL_GetError(), log::error);
+          trace("Unable to open the audio subsystem", SDL_GetError());
           return;
         }
       }
@@ -201,7 +201,7 @@ class audiosource : public gear2d::component::base {
       chunk = Mix_LoadWAV(soundfn.c_str());
       if (chunk == 0) {
         logerr;
-        trace("Unable to load sound", soundfn, "[", SDL_GetError, "]", log::error);
+        trace("Unable to load sound", soundfn, "[", SDL_GetError, "]");
         return 0;
       }
       
@@ -214,7 +214,7 @@ class audiosource : public gear2d::component::base {
         m = Mix_LoadMUS(musicfn.c_str());
         if (m == 0) {
           logerr;
-          trace("Unable to load music", musicfn, "[", SDL_GetError(), "]", log::error);
+          trace("Unable to load music", musicfn, "[", SDL_GetError(), "]");
           return 0;
         }
       }
