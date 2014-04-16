@@ -6,7 +6,7 @@ g2dcomponent(TYPE audiosource
              FAMILY audiosource
              SOURCES audiosource.cc)
 
-include_directories(${SDL2_INCLUDE_DIR})
+include_directories(${SDL2_INCLUDE_DIR} ${SDL2_MIXER_INCLUDE_DIR})
 target_link_libraries(audiosource ${SDL2_LIBRARY} ${SDL2_MIXER_LIBRARY})
 
 # On Win32, package SDL2 mixer dlls
