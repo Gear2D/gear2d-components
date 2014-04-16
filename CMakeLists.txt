@@ -42,20 +42,7 @@ set(COMPONENT_INSTALL_DIR lib/gear2d/component)
 include_directories(${Gear2D_INCLUDE_DIR} ${SDL2_INCLUDE_DIR})
 link_directories(${Gear2D_LIBRARY_DIR})
 
-if(WIN32)
-  get_filename_component(SDL2_MIXER_LIBRARY_DIR ${SDL2_MIXER_LIBRARY} PATH)
-  set(SDL2_MIXER_DLLS
-    "${SDL2_MIXER_LIBRARY_DIR}/SDL2_mixer.dll"
-    "${SDL2_MIXER_LIBRARY_DIR}/libvorbisfile-3.dll"
-    "${SDL2_MIXER_LIBRARY_DIR}/libvorbis-0.dll"
-    "${SDL2_MIXER_LIBRARY_DIR}/libogg-0.dll"
-    "${SDL2_MIXER_LIBRARY_DIR}/libmikmod-2.dll"
-    "${SDL2_MIXER_LIBRARY_DIR}/libFLAC-8.dll"
-  )
-  message(STATUS "Packaging SDL2_mixer DLLs: ${SDL2_MIXER_DLLS}")
-  install(FILES ${SDL2_MIXER_DLLS}
-          DESTINATION bin
-  )
+if (WIN32)
   if(MINGW)
     message(STATUS "Compiling with MINGW!")
     set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static -lpthread -dynamic")
